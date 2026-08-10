@@ -1,0 +1,120 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function profile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function active() { return signedIn() && profile().active == true; }
+    function sameOrg(orgId) { return active() && profile().orgId == orgId; }
+    function roleIs(roles) { return active() && profile().role in roles; }
+    function serviceIs(services) { return active() && profile().service in services; }
+    function admin() { return roleIs(['owner', 'admin']); }
+    function manager() { return roleIs(['owner', 'admin', 'direction']); }
+    function government() { return serviceIs(['GVT']); }
+    function lawEnforcement() { return serviceIs(['GN', 'PN']); }
+    function medical() { return serviceIs(['CH']); }
+    function rescue() { return serviceIs(['SP', 'CH']); }
+
+    match /organizations/{orgId} {
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.status == 'active';
+      allow read: if sameOrg(orgId);
+      allow update: if sameOrg(orgId) && admin();
+      allow delete: if sameOrg(orgId) && roleIs(['owner']);
+
+      match /citizens/{id} {
+        allow read: if sameOrg(orgId) && (admin() || lawEnforcement() || government());
+        allow write: if sameOrg(orgId) && (admin() || manager() || lawEnforcement() || government());
+      }
+      match /vehicles/{id} {
+        allow read: if sameOrg(orgId) && (admin() || lawEnforcement() || government());
+        allow write: if sameOrg(orgId) && (admin() || manager() || lawEnforcement());
+      }
+      match /medicalRecords/{id} {
+        allow read: if sameOrg(orgId) && (admin() || medical());
+        allow write: if sameOrg(orgId) && (admin() || (medical() && roleIs(['direction','doctor','medic'])));
+      }
+      match /deaths/{id} {
+        allow read: if sameOrg(orgId) && (admin() || medical() || government());
+        allow create, update: if sameOrg(orgId) && (admin() || medical());
+        allow delete: if sameOrg(orgId) && admin();
+      }
+      match /justiceCases/{id} {
+        allow read: if sameOrg(orgId) && (admin() || government());
+        allow write: if sameOrg(orgId) && (admin() || (government() && roleIs(['direction','magistrate','greffe'])));
+      }
+      match /prisonTransfers/{id} {
+        allow read: if sameOrg(orgId) && (admin() || government());
+        allow write: if sameOrg(orgId) && (admin() || (government() && roleIs(['direction','magistrate','greffe'])));
+      }
+      match /civilDocuments/{id} {
+        allow read: if sameOrg(orgId) && (admin() || government());
+        allow write: if sameOrg(orgId) && (admin() || government());
+      }
+      match /weaponPermits/{id} {
+        allow read: if sameOrg(orgId) && (admin() || medical() || government() || lawEnforcement());
+        allow write: if sameOrg(orgId) && (admin() || manager() || medical() || government() || lawEnforcement());
+      }
+      match /cases/{id} {
+        allow read: if sameOrg(orgId) && (admin() || (lawEnforcement() && resource.data.service == profile().service) || government());
+        allow write: if sameOrg(orgId) && (admin() || (lawEnforcement() && (resource.data.service == profile().service || request.resource.data.service == profile().service)));
+      }
+      match /transmissions/{id} {
+        allow read: if sameOrg(orgId) && (admin() || profile().service in resource.data.participants);
+        allow create: if sameOrg(orgId)
+          && request.resource.data.from == profile().service
+          && profile().service in request.resource.data.participants;
+        allow update: if sameOrg(orgId) && (admin() || profile().service in resource.data.participants);
+        allow delete: if sameOrg(orgId) && admin();
+      }
+      match /staff/{id} {
+        allow read: if sameOrg(orgId) && (admin() || resource.data.service == profile().service);
+        allow write: if sameOrg(orgId) && manager();
+      }
+      match /audit/{id} {
+        allow read: if sameOrg(orgId) && manager();
+        allow create: if sameOrg(orgId) && request.resource.data.service == profile().service;
+        allow update, delete: if false;
+      }
+      match /emergencyCalls/{id} {
+        allow read: if sameOrg(orgId);
+        allow create, update: if sameOrg(orgId) && (admin() || rescue() || lawEnforcement() || roleIs(['dispatcher','direction']));
+        allow delete: if sameOrg(orgId) && admin();
+      }
+      match /interventions/{id} {
+        allow read: if sameOrg(orgId);
+        allow write: if sameOrg(orgId) && (admin() || manager() || rescue() || lawEnforcement());
+      }
+      match /patrols/{id} {
+        allow read: if sameOrg(orgId);
+        allow write: if sameOrg(orgId) && (admin() || manager() || resource.data.service == profile().service || request.resource.data.service == profile().service);
+      }
+      match /tasks/{id} {
+        allow read: if sameOrg(orgId) && (admin() || resource.data.service == profile().service);
+        allow write: if sameOrg(orgId) && (admin() || manager() || request.resource.data.service == profile().service);
+      }
+      match /reports/{id} {
+        allow read: if sameOrg(orgId) && (admin() || resource.data.service == profile().service);
+        allow write: if sameOrg(orgId) && (admin() || manager() || request.resource.data.service == profile().service || resource.data.service == profile().service);
+      }
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || (admin() && profile().orgId == resource.data.orgId));
+      allow create: if signedIn() && (
+        (request.auth.uid == uid
+          && request.resource.data.uid == uid
+          && get(/databases/$(database)/documents/organizations/$(request.resource.data.orgId)).data.ownerUid == uid)
+        || (admin() && request.resource.data.orgId == profile().orgId)
+      );
+      allow update: if signedIn() && (
+        (request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']))
+        || (admin() && request.resource.data.orgId == profile().orgId)
+      );
+      allow delete: if signedIn() && admin() && resource.data.orgId == profile().orgId && uid != request.auth.uid;
+    }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}

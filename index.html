@@ -1,0 +1,3098 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MDT-GTA-RP — Système Opérationnel National</title>
+  <meta name="description" content="Système d'Information Opérationnel Français pour Services Publics - GTA RP MDT">
+  <style>
+    /* ==========================================
+       VARIABLES DE THEME ET PALETTE PREMIUM
+       ========================================== */
+    :root {
+      --bg-dark: #07131f;
+      --bg-side: #091827;
+      --bg-panel: #0d2033;
+      --bg-panel2: #10263d;
+      --line: #1d354d;
+      --text-main: #ecf2f8;
+      --text-muted: #788ba2;
+
+      --accent-gold: #d2b57d;
+      --accent-gold-hover: #e5cb9a;
+      --accent-blue: #6389e5;
+      --accent-blue-hover: #80a1f0;
+
+      --status-success: #4bc9a1;
+      --status-warning: #f59e0b;
+      --status-danger: #ec6a65;
+
+      --font-family: Arial, sans-serif;
+      --transition-speed: 0.2s;
+    }
+
+    /* Reset global et scrollbars */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--line);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-blue);
+    }
+
+    /* Raccourcis utilitaires */
+    .hidden {
+      display: none !important;
+    }
+
+    .auth-tabs{display:flex;gap:6px;margin:18px 0}.auth-tabs button{flex:1;padding:9px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--text-muted);cursor:pointer}.auth-tabs button.active{background:rgba(99,137,229,.14);border-color:var(--accent-blue);color:#fff}.sync-pill{display:inline-flex;gap:6px;align-items:center;font-size:9px;color:var(--status-success)}.sync-pill.offline{color:var(--status-warning)}
+
+    /* ==========================================
+       ECRAN DE CONNEXION (LOGIN)
+       ========================================== */
+    .login-container {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 46% 54%;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-left {
+      padding: 45px clamp(45px, 7vw, 105px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: linear-gradient(135deg, #0d1e33, var(--bg-dark));
+      border-right: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .seal {
+      width: 43px;
+      height: 43px;
+      border: 1px solid #aebfd3;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: Georgia, serif;
+      font-size: 12px;
+      box-shadow: inset 0 0 0 4px var(--bg-dark), inset 0 0 0 5px #415772;
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 14px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .brand small {
+      display: block;
+      margin-top: 5px;
+      color: #6e8098;
+      font-size: 8px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .login-box {
+      margin: auto 0;
+      max-width: 440px;
+    }
+
+    .eyebrow {
+      color: var(--accent-gold);
+      font-size: 9px;
+      letter-spacing: .2em;
+      font-weight: bold;
+      text-transform: uppercase;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .login-box h1 {
+      font: 400 38px Georgia, serif;
+      margin: 14px 0 8px;
+      color: #fff;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      color: #a5b4c5;
+      font-size: 10px;
+      font-weight: bold;
+      letter-spacing: .05em;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+    }
+
+    .field {
+      width: 100%;
+      border: 1px solid #263d55;
+      border-radius: 7px;
+      background: #0d1f32;
+      color: white;
+      padding: 14px;
+      outline: none;
+      font-size: 13px;
+      transition: border-color var(--transition-speed);
+    }
+
+    .field:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .primary {
+      border: 0;
+      border-radius: 7px;
+      background: linear-gradient(135deg, #e2cb9e, #bd9561);
+      color: #172235;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 14px 18px;
+      cursor: pointer;
+      transition: opacity var(--transition-speed), transform var(--transition-speed);
+    }
+
+    .primary:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .login-box .primary {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .demo {
+      text-align: center;
+      color: #52667e;
+      font-size: 8px;
+      margin-top: 12px;
+    }
+
+    .login-foot {
+      display: flex;
+      justify-content: space-between;
+      color: #4f637a;
+      font-size: 8px;
+    }
+
+    .online {
+      color: var(--status-success);
+    }
+
+    /* Panneau d'ambiance à droite */
+    .login-art {
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 42%, #173b60, #0b2035 40%, #06101c 74%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 55px;
+    }
+
+    .login-art:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(30deg, transparent 49.8%, #35618a12 50%, transparent 50.2%);
+      background-size: 140px 140px;
+    }
+
+    .flag {
+      position: absolute;
+      right: 55px;
+      top: 48px;
+      width: 72px;
+      height: 3px;
+      background: linear-gradient(90deg, #4777d1 33%, #eee 33% 66%, #dc5d5d 66%);
+    }
+
+    .hero {
+      max-width: 520px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero > span {
+      color: #7890aa;
+      font-size: 9px;
+      letter-spacing: .24em;
+    }
+
+    .hero h2 {
+      font: 400 61px/1 Georgia, serif;
+      margin: 22px 0;
+      color: #fff;
+    }
+
+    .hero h2 em {
+      font-style: normal;
+      color: var(--accent-gold);
+    }
+
+    .hero p {
+      color: #8294a9;
+      line-height: 1.7;
+      max-width: 420px;
+      font-size: 13px;
+    }
+
+    .services {
+      display: flex;
+      gap: 11px;
+      margin-top: 38px;
+    }
+
+    .service-logo {
+      width: 61px;
+      height: 68px;
+      border: 1px solid #203850;
+      border-radius: 7px;
+      background: #0b1b2d;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .service-logo b {
+      font-size: 20px;
+    }
+
+    .service-logo small {
+      font-size: 7px;
+      color: #768aa1;
+      font-weight: bold;
+    }
+
+    /* ==========================================
+       DASHBOARD APPLICATIF (MDT CORPS)
+       ========================================== */
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 250px 1fr;
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: 250px;
+      padding: 24px 17px;
+      background: var(--bg-side);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    .sidebar .brand {
+      padding: 0 8px 23px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .service-switch {
+      margin: 19px 0;
+      padding: 10px;
+      border: 1px solid #20394f;
+      border-radius: 8px;
+      background: var(--bg-panel);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      position: relative;
+    }
+
+    .service-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      background: var(--accent-blue);
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .service-switch small {
+      font-size: 7px;
+      color: #667a92;
+      letter-spacing: .12em;
+      display: block;
+      text-transform: uppercase;
+    }
+
+    .service-switch strong {
+      font-size: 10px;
+      color: #fff;
+    }
+
+    .service-switch select {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .nav button, .config {
+      height: 42px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: #7d90a6;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 12px;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      text-align: left;
+      transition: background var(--transition-speed), color var(--transition-speed);
+      width: 100%;
+    }
+
+    .nav button:hover, .config:hover {
+      background: var(--bg-panel2);
+      color: #fff;
+    }
+
+    .nav button.active {
+      background: linear-gradient(90deg, #1b3758, #112941);
+      color: #eef4fb;
+      border-left: 3px solid var(--accent-gold);
+    }
+
+    .nav button span, .config span {
+      width: 18px;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    .nav b {
+      margin-left: auto;
+      padding: 2px 6px;
+      border-radius: 9px;
+      background: var(--status-danger);
+      color: #fff;
+      font-size: 7px;
+    }
+
+    .side-bottom {
+      margin-top: auto;
+      padding-top: 15px;
+      border-top: 1px solid var(--line);
+    }
+
+    .config {
+      width: 100%;
+      border-radius: 6px;
+      margin-bottom: 15px;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #263e59;
+      display: grid;
+      place-items: center;
+      font-size: 9px;
+      font-weight: bold;
+    }
+
+    .profile p {
+      flex: 1;
+      margin: 0;
+      min-width: 0;
+    }
+
+    .profile strong, .profile small {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .profile strong {
+      font-size: 9px;
+      color: #fff;
+    }
+
+    .profile small {
+      font-size: 7px;
+      color: #667a92;
+      margin-top: 4px;
+    }
+
+    .logout {
+      background: none;
+      border: 0;
+      color: #71859b;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 5px;
+      transition: color var(--transition-speed);
+    }
+
+    .logout:hover {
+      color: var(--status-danger);
+    }
+
+    /* Main Area */
+    .main {
+      grid-column: 2;
+      min-width: 0;
+    }
+
+    .topbar {
+      height: 70px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      background: #081624ee;
+      z-index: 9;
+      backdrop-filter: blur(5px);
+    }
+
+    .search {
+      width: min(520px, 49vw);
+      height: 37px;
+      border: 1px solid #1e364e;
+      border-radius: 7px;
+      background: #0c1d2f;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      color: #60758d;
+    }
+
+    .search input {
+      flex: 1;
+      background: none;
+      border: 0;
+      outline: 0;
+      color: white;
+      font-size: 11px;
+      margin-left: 9px;
+    }
+
+    .search kbd {
+      font-size: 7px;
+      border: 1px solid #29435d;
+      border-radius: 4px;
+      padding: 3px 5px;
+      font-family: monospace;
+    }
+
+    .right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .status {
+      border: 1px solid #223b53;
+      background: #10263a;
+      border-radius: 6px;
+      color: var(--status-success);
+      padding: 9px 12px;
+      font-size: 8px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .clock {
+      font-size: 9px;
+      text-align: right;
+    }
+
+    .clock small {
+      display: block;
+      color: #647991;
+      font-size: 7px;
+      text-transform: uppercase;
+    }
+
+    .clock strong {
+      color: #fff;
+    }
+
+    .content {
+      padding: 32px;
+      max-width: 1500px;
+      margin: auto;
+    }
+
+    .heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 28px;
+    }
+
+    .heading h1 {
+      font: 400 31px Georgia, serif;
+      margin: 7px 0;
+      color: #fff;
+    }
+
+    .heading p {
+      margin: 0;
+      color: #71849a;
+      font-size: 11px;
+    }
+
+    /* Cartes stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 13px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      min-height: 113px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: linear-gradient(145deg, #10263d, #0b1d2f);
+      padding: 17px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color var(--transition-speed);
+    }
+
+    .stat:hover {
+      border-color: var(--accent-blue);
+    }
+
+    .stat span, .stat small {
+      display: block;
+      color: #778ba2;
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat strong {
+      font: 400 29px Georgia, serif;
+      display: block;
+      margin: 9px 0;
+      color: #fff;
+    }
+
+    .stat b {
+      width: 34px;
+      height: 34px;
+      border-radius: 7px;
+      background: #18345a;
+      display: grid;
+      place-items: center;
+      color: #7198ed;
+      font-size: 16px;
+    }
+
+    .stat.red b {
+      background: #41262d;
+      color: var(--status-danger);
+    }
+
+    .stat.green b {
+      background: #173e38;
+      color: var(--status-success);
+    }
+
+    .stat.gold b {
+      background: #40362a;
+      color: var(--accent-gold);
+    }
+
+    /* Panneaux */
+    .grid {
+      display: grid;
+      grid-template-columns: 1.65fr 1fr;
+      gap: 14px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--bg-panel);
+      padding: 21px;
+      margin-bottom: 20px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .panel h2 {
+      font: 400 18px Georgia, serif;
+      margin: 6px 0;
+      color: #fff;
+    }
+
+    .link {
+      border: 0;
+      background: none;
+      color: #7e97b6;
+      font-size: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+
+    /* Flux d'événements */
+    .event {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 13px 0;
+      border-top: 1px solid #1a3249;
+    }
+
+    .event:first-of-type {
+      border-top: none;
+    }
+
+    .event time {
+      font-size: 9px;
+      color: #8497aa;
+      font-family: monospace;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+    }
+
+    .event div {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .event small {
+      display: block;
+      font-size: 7px;
+      color: #6e8299;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+      letter-spacing: 0.05em;
+    }
+
+    .event strong {
+      display: block;
+      font-size: 10px;
+      color: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge {
+      font-size: 7px;
+      border-radius: 9px;
+      padding: 5px 8px;
+      background: #183249;
+      color: #95a7b9;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .badge.urgent {
+      background: #44262c;
+      color: var(--status-danger);
+    }
+
+    .badge.priority {
+      background: #413725;
+      color: var(--accent-gold);
+    }
+
+    .badge.done {
+      background: #173e36;
+      color: var(--status-success);
+    }
+
+    /* Actions rapides */
+    .quick button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 13px 0;
+      border: 0;
+      border-top: 1px solid #1a3249;
+      background: none;
+      color: #8196ad;
+      text-align: left;
+      cursor: pointer;
+      transition: background var(--transition-speed);
+    }
+
+    .quick button:hover {
+      background: rgba(255,255,255,0.01);
+    }
+
+    .quick button:first-of-type {
+      border-top: none;
+    }
+
+    .quick button > span {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: #172f49;
+      color: #7799e6;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+    }
+
+    .quick button div {
+      flex: 1;
+    }
+
+    .quick strong {
+      display: block;
+      font-size: 9px;
+      color: #dbe4ee;
+    }
+
+    .quick small {
+      display: block;
+      font-size: 7px;
+      margin-top: 4px;
+      color: #768aa1;
+    }
+
+    /* Tableaux et registres */
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin: 15px 0;
+    }
+
+    .tabs button {
+      border: 1px solid #263e55;
+      background: none;
+      color: #758aa1;
+      border-radius: 5px;
+      padding: 7px 12px;
+      font-size: 8px;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .tabs button:hover {
+      background: var(--bg-panel2);
+      color: #fff;
+    }
+
+    .tabs button.active {
+      background: #193653;
+      color: white;
+    }
+
+    .table {
+      border: 1px solid #1d364e;
+      border-radius: 7px;
+      overflow-x: auto;
+      background: #0a1726;
+    }
+
+    .row {
+      min-width: 670px;
+      display: grid;
+      grid-template-columns: 1.1fr 1.5fr 1.2fr 1fr 1fr;
+      border-top: 1px solid #193249;
+      align-items: center;
+      transition: background var(--transition-speed);
+    }
+
+    .row:hover {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .row:first-child {
+      border: 0;
+    }
+
+    .row span {
+      padding: 14px;
+      font-size: 9px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .row.head {
+      background: #102840;
+      color: #677d94;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .row.head span {
+      font-size: 7px;
+    }
+
+    .row.clickable {
+      cursor: pointer;
+    }
+
+    .good {
+      color: var(--status-success);
+      font-weight: bold;
+    }
+
+    .bad {
+      color: var(--status-danger);
+      font-weight: bold;
+    }
+
+    /* ==========================================
+       MODAL ET FORMULAIRES SÉCURISÉS
+       ========================================== */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: #020810c9;
+      display: grid;
+      place-items: center;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal {
+      width: min(510px, calc(100% - 25px));
+      background: #10243a;
+      border: 1px solid #2b435c;
+      border-radius: 11px;
+      padding: 29px;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .modal h2 {
+      font: 400 23px Georgia, serif;
+      margin: 8px 0;
+      color: #fff;
+    }
+
+    .close {
+      position: absolute;
+      right: 15px;
+      top: 10px;
+      background: none;
+      border: 0;
+      color: #7b8ea4;
+      font-size: 25px;
+      cursor: pointer;
+    }
+
+    .check-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin: 12px 0;
+    }
+
+    .check-list label {
+      margin: 0;
+      border: 1px solid #233c54;
+      border-radius: 7px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .check-list i {
+      width: 27px;
+      height: 23px;
+      border-radius: 4px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-style: normal;
+      font-size: 7px;
+      font-weight: bold;
+    }
+
+    .toast {
+      position: fixed;
+      right: 25px;
+      bottom: 25px;
+      padding: 13px 18px;
+      background: #173b35;
+      border: 1px solid #2c6b5e;
+      border-radius: 7px;
+      font-size: 10px;
+      color: #4bc9a1;
+      font-weight: bold;
+      z-index: 200;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      animation: slideUp 0.2s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Styles pour détails de fiches */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .detail-block {
+      background: #0d1f32;
+      border: 1px solid #1e364e;
+      border-radius: 7px;
+      padding: 15px;
+    }
+
+    .detail-block h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent-gold);
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 5px;
+    }
+
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+
+    .detail-item span:first-child {
+      color: var(--text-muted);
+    }
+
+    .detail-item span:last-child {
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .record-card {
+      background: rgba(236,106,101,0.05);
+      border: 1px solid rgba(236,106,101,0.15);
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+
+    .record-card strong {
+      display: block;
+      color: var(--status-danger);
+      margin-bottom: 4px;
+    }
+
+    /* Global Search Overlay (Ctrl K) */
+    .search-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.9);
+      backdrop-filter: blur(8px);
+      z-index: 150;
+      display: flex;
+      justify-content: center;
+      padding-top: 10vh;
+    }
+
+    .search-modal {
+      width: min(650px, calc(100% - 25px));
+    }
+
+    .search-results {
+      background: #10243a;
+      border: 1px solid #2b435c;
+      border-radius: 11px;
+      max-height: 60vh;
+      overflow-y: auto;
+      margin-top: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .result-group-title {
+      background: #0d1e33;
+      padding: 8px 15px;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-gold);
+      font-weight: bold;
+    }
+
+    .result-item {
+      padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background var(--transition-speed);
+    }
+
+    .result-item:hover {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .result-item-info strong {
+      display: block;
+      font-size: 11px;
+      color: #fff;
+    }
+
+    .result-item-info small {
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       CONCEPTION RESPONSIVE
+       ========================================== */
+    @media(max-width:950px){
+      .stats{grid-template-columns:1fr 1fr}
+      .grid{grid-template-columns:1fr}
+      .login-container{grid-template-columns:1fr}
+      .login-art{display:none}
+    }
+
+    @media(max-width:680px){
+      .app{display:block}
+      .sidebar{position:static;width:100%;height:auto}
+      .sidebar .brand{border:0}
+      .nav{display:grid;grid-template-columns:1fr 1fr}
+      .side-bottom{margin-top:15px}
+      .main{display:block}
+      .topbar{padding:0 14px}
+      .status,.clock{display:none}
+      .search{width:100%}
+      .content{padding:21px 14px}
+      .heading{align-items:start;gap:15px}
+      .stats{grid-template-columns:1fr}
+      .check-list{grid-template-columns:1fr}
+      .login-left{padding:35px 25px}
+      .login-foot{margin-top:35px}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================
+       PORTAIL DE CONNEXION SÉCURISÉ
+       ========================================== -->
+  <section id="login" class="login-container">
+    <div class="login-left">
+      <div class="brand">
+        <div class="seal">RF</div>
+        <div>
+          <strong>MDT–GTA–RP</strong>
+          <small>SYSTÈME OPÉRATIONNEL FRANÇAIS</small>
+        </div>
+      </div>
+
+      <div class="login-box">
+        <span class="eyebrow">ACCÈS SÉCURISÉ</span>
+        <h1>Portail des services publics</h1>
+        <p class="subtitle">Connectez-vous à votre espace opérationnel unifié.</p>
+
+        <div class="auth-tabs">
+          <button id="loginTab" class="active" type="button">Se connecter</button>
+          <button id="createOrgTab" type="button">Créer un serveur</button>
+        </div>
+        <form id="loginForm">
+          <div class="form-group">
+            <label>Adresse professionnelle</label>
+            <input id="loginEmail" type="email" class="field" placeholder="agent@votre-serveur.fr" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label>Mot de passe de sécurité</label>
+            <input id="loginPassword" type="password" class="field" placeholder="8 caractères minimum" required autocomplete="current-password">
+          </div>
+          <button class="primary" type="submit">Accéder au MDT →</button>
+          <button id="resetPasswordBtn" class="link" type="button" style="margin-top:12px">Mot de passe oublié</button>
+          <p class="demo">Compte Firebase sécurisé — aucune donnée n'est stockée dans le code.</p>
+        </form>
+        <form id="createOrgForm" class="hidden">
+          <div class="form-group"><label>Nom de votre serveur RP</label><input id="newOrgName" class="field" required placeholder="Ex. Horizon RP"></div>
+          <div class="form-group"><label>Votre nom RP</label><input id="newOwnerName" class="field" required placeholder="Prénom Nom"></div>
+          <div class="form-group"><label>Matricule</label><input id="newOwnerBadge" class="field" required placeholder="ADM-0001"></div>
+          <div class="form-group"><label>Institution principale</label><select id="newOwnerService" class="field"><option value="GN">Gendarmerie</option><option value="PN">Police nationale</option><option value="SP">Sapeurs-pompiers</option><option value="CH">Hôpital / SAMU</option><option value="GVT">Gouvernement / Justice</option></select></div>
+          <div class="form-group"><label>Adresse e-mail administrateur</label><input id="newOwnerEmail" type="email" class="field" required></div>
+          <div class="form-group"><label>Mot de passe administrateur</label><input id="newOwnerPassword" type="password" minlength="8" class="field" required></div>
+          <button class="primary" type="submit">Créer mon espace sécurisé →</button>
+          <p class="demo">Chaque serveur possède une organisation et des données totalement séparées.</p>
+        </form>
+      </div>
+
+      <div class="login-foot">
+        <span id="syncStatus" class="online">● Firebase prêt</span>
+        <span>v3.0.0 • Cloud Firestore</span>
+      </div>
+    </div>
+
+    <aside class="login-art">
+      <div class="flag"></div>
+      <div class="hero">
+        <span>PLATEFORME MULTI-SERVICES SÉCURISÉE</span>
+        <h2>Servir.<br>Protéger.<br><em>Coordonner.</em></h2>
+        <p>Un outil commun de centralisation pour l'ensemble des institutions publiques et judiciaires.</p>
+        <div id="serviceLogos" class="services"></div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ==========================================
+       ESPACE TERMINAL OPERATIONNEL PRINCIPAL
+       ========================================== -->
+  <section id="application" class="app hidden">
+    <!-- Sidebar de gauche -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="seal">RF</div>
+        <div>
+          <strong>MDT–GTA–RP</strong>
+          <small id="orgSmall">RÉPUBLIQUE FRANÇAISE</small>
+        </div>
+      </div>
+
+      <div class="service-switch">
+        <span id="serviceIcon" class="service-icon">✦</span>
+        <div>
+          <small>SERVICE ACTIF</small>
+          <strong id="serviceName">Gendarmerie</strong>
+        </div>
+        <select id="serviceSelect" aria-label="Changer de service"></select>
+      </div>
+
+      <nav id="nav" class="nav"></nav>
+
+      <div class="side-bottom">
+        <button id="configBtn" class="config"><span>⚙</span>Configurer le MDT</button>
+        <div class="profile">
+          <div id="agentAvatar" class="avatar">NN</div>
+          <p>
+            <strong id="agentNameDisplay">Noé Natter</strong>
+            <small id="agentRoleDisplay">Administrateur • GND-0742</small>
+          </p>
+          <button id="logout" class="logout" title="Déconnexion">↪</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Zone opérationnelle de droite -->
+    <main class="main">
+      <header class="topbar">
+        <div class="search">
+          ⌕
+          <input id="search" placeholder="Rechercher un citoyen, véhicule, dossier... (CTRL K)" autocomplete="off">
+          <kbd>CTRL K</kbd>
+        </div>
+        <div class="right">
+          <button class="status">● En service</button>
+          <div id="clock" class="clock"></div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="heading">
+          <div>
+            <span class="eyebrow" id="pageTag">CENTRE OPÉRATIONNEL</span>
+            <h1 id="pageTitle">Tableau de bord</h1>
+            <p id="pageDescription">Voici la situation opérationnelle en temps réel de votre juridiction.</p>
+          </div>
+          <div id="headerActions">
+            <!-- Injecté de manière dynamique par page -->
+          </div>
+        </div>
+
+        <!-- ZONE DE RENDU DES MODULES DYNAMIQUES -->
+        <div id="dynamicPageContent"></div>
+      </div>
+    </main>
+  </section>
+
+  <!-- ==========================================
+       MODALS DE DIALOGUES & POPUPS
+       ========================================== */ -->
+  <div id="modal" class="modal-bg hidden">
+    <section class="modal">
+      <button id="closeModal" class="close">×</button>
+      <span class="eyebrow" id="modalEyebrow">PERSONNALISATION</span>
+      <h2 id="modalTitle">Configurer votre MDT</h2>
+      <p class="subtitle" id="modalSubtitle">Adaptez l'identité et les services à votre serveur RP.</p>
+
+      <form id="modalForm">
+        <div id="modalBody">
+          <!-- Rempli en JS -->
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <!-- RECHERCHE GLOBALE SUPERPOSÉE (CTRL K) -->
+  <div id="globalSearchOverlay" class="search-overlay hidden">
+    <div class="search-modal">
+      <input type="text" id="globalSearchInput" class="field" style="font-size: 16px; padding: 18px;" placeholder="Recherche rapide globale... (Echap pour fermer)" autocomplete="off">
+      <div id="globalSearchResults" class="search-results">
+        <!-- Résultats de frappe instantanée -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST DE NOTIFICATION DYNAMIQUE -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- ==========================================
+       LOGIQUE APPLICATIVE SÉCURISÉE (JS)
+       ========================================== -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    // ==========================================
+    // INITIALISATION DE LA BASE DE DONNÉES LOCALSTORAGE
+    // ==========================================
+
+    const initialServices = [
+      { name: "Gendarmerie", code: "GN", color: "#6389e5", icon: "✦", enabled: true },
+      { name: "Police nationale", code: "PN", color: "#57a6ff", icon: "◆", enabled: true },
+      { name: "Sapeurs-pompiers", code: "SP", color: "#ef6b63", icon: "✚", enabled: true },
+      { name: "Hôpital", code: "CH", color: "#4fd0aa", icon: "+", enabled: true },
+      { name: "Gouvernement", code: "GVT", color: "#d5b374", icon: "●", enabled: true }
+    ];
+
+    const initialCitizens = [
+      { id: "FR-01", firstname: "Lucas", lastname: "Martin", birthdate: "12/04/1995", driverLicense: "Valide", wanted: false, phone: "555-4029", notes: "Aucune remarque spécifique.", records: [] },
+      { id: "FR-02", firstname: "Sarah", lastname: "Bernard", birthdate: "28/09/1998", driverLicense: "Suspendu", wanted: true, phone: "555-9011", notes: "Avis de recherche actif pour recel et complicité.", records: [{ date: "08/08/2026", title: "Vol de véhicule aggravé", type: "Délit", desc: "Complicité active et recel de Sultan Classic volée." }] },
+      { id: "FR-03", firstname: "Arthur", lastname: "Leroy", birthdate: "03/11/1991", driverLicense: "Valide", wanted: false, phone: "555-3392", notes: "Sapeur-Pompier volontaire.", records: [] },
+      { id: "FR-04", firstname: "Chloé", lastname: "Robert", birthdate: "15/07/2000", driverLicense: "Valide", wanted: false, phone: "555-8833", notes: "Citoyenne sans antécédents.", records: [] }
+    ];
+
+    const initialVehicles = [
+      { plate: "AA-123-BB", model: "Sultan Classic", color: "Noire", owner: "Lucas Martin", ownerId: "FR-01", wanted: true, reason: "Véhicule repéré sur un délit de fuite.", notes: "Vitres surteintées." },
+      { plate: "CC-456-DD", model: "Coquette", color: "Rouge", owner: "Arthur Leroy", ownerId: "FR-03", wanted: false, reason: "", notes: "Strictement d'origine." },
+      { plate: "EE-789-FF", model: "Bison", color: "Blanc", owner: "Sarah Bernard", ownerId: "FR-02", wanted: false, reason: "", notes: "Véhicule professionnel." }
+    ];
+
+    const initialInterventions = [
+      { id: "INT-001", time: "21:42", service: "SP", title: "Accident corporel — A6, sortie 14", status: "En cours", priority: "Urgent", badgeClass: "urgent", desc: "Collision arrière entre 2 véhicules légers." },
+      { id: "INT-002", time: "21:28", service: "GN", title: "Signalement Sultan noire recherchée", status: "En cours", priority: "Prioritaire", badgeClass: "priority", desc: "Aperçue à pleine vitesse sur la Senora Freeway." },
+      { id: "INT-003", time: "20:57", service: "PN", title: "Contrôle routier Place République", status: "Traité", priority: "Traité", badgeClass: "done", desc: "Fiche R.A.S., véhicule en règle." }
+    ];
+
+    const initialReports = [
+      { id: "REP-01", title: "Rapport d'infraction routière", date: "09/08/2026", citizenName: "Sarah Bernard", citizenId: "FR-02", author: "Noé Natter", content: "Excès de vitesse de plus de 50km/h relevé à l'encontre de Mme Bernard au volant de la Bison blanche. Permis suspendu sur-le-champ." }
+    ];
+
+    const initialCases = [
+      { id: "DOS-01", title: "Enquête Sultan Noire", status: "Actif", desc: "Enquête judiciaire ouverte concernant le réseau de vol et de recel de Sultan Classic noires sévissant dans la région.", citizenId: "FR-02", citizenName: "Sarah Bernard" }
+    ];
+
+    const initialPatrols = [
+      { id: "PAT-01", name: "Écho 21", service: "GN", leader: "Noé Natter", members: "2 agents", vehicle: "Alpine A110", status: "En patrouille" },
+      { id: "PAT-02", name: "Victor 03", service: "PN", leader: "Léa Garnier", members: "3 agents", vehicle: "Peugeot 5008", status: "Disponible" },
+      { id: "PAT-03", name: "VSAV 12", service: "SP", leader: "Arthur Leroy", members: "3 secouristes", vehicle: "VSAV", status: "En intervention" },
+      { id: "PAT-04", name: "SMUR 02", service: "CH", leader: "Dr Chloé Robert", members: "3 soignants", vehicle: "UMH", status: "Disponible" }
+    ];
+
+    const initialMedicalRecords = [
+      { id: "PAT-FR-01", citizenId: "FR-01", patient: "Lucas Martin", blood: "O+", allergies: "Aucune connue", condition: "Stable", updated: "09/08/2026" },
+      { id: "PAT-FR-02", citizenId: "FR-02", patient: "Sarah Bernard", blood: "A−", allergies: "Pénicilline", condition: "Suivi requis", updated: "08/08/2026" }
+    ];
+
+    const initialWeaponPermits = [
+      { id: "PPA-001", citizenId: "FR-01", citizen: "Lucas Martin", doctor: "Dr Chloé Robert", medicalStatus: "Validé", policeStatus: "À contrôler", status: "Transmission FDO" },
+      { id: "PPA-002", citizenId: "FR-03", citizen: "Arthur Leroy", doctor: "Dr Chloé Robert", medicalStatus: "En attente", policeStatus: "Non transmis", status: "Examen médical" }
+    ];
+
+    const initialDeaths = [
+      { id: "DEC-2026-004", citizen: "Jean Morel", date: "07/08/2026", doctor: "Dr Chloé Robert", cause: "Traumatisme majeur", status: "Transmis à l'état civil" }
+    ];
+
+    const initialCivilDocuments = [
+      { id: "ETAT-001", citizen: "Lucas Martin", type: "Carte nationale d'identité", number: "CNI-FR-240194", status: "Valide", issued: "12/04/2024" },
+      { id: "ETAT-002", citizen: "Sarah Bernard", type: "Permis de conduire", number: "PC-FR-991202", status: "Suspendu", issued: "22/06/2021" }
+    ];
+
+    const initialJusticeCases = [
+      { id: "TRIB-026", citizen: "Sarah Bernard", source: "DOS-01", reason: "Recel et complicité", hearing: "À programmer", status: "Saisi par les FDO" }
+    ];
+
+    const initialPrisonTransfers = [
+      { id: "ECR-011", citizen: "Marc Delcourt", caseId: "TRIB-019", sentence: "18 mois", prison: "Centre pénitentiaire de Bolingbroke", status: "Écrou effectué" }
+    ];
+
+    const initialStaff = [
+      { id: "AG-001", name: "Noé Natter", service: "GN", grade: "Administrateur", permissions: "Direction complète", status: "Actif" },
+      { id: "AG-002", name: "Léa Garnier", service: "PN", grade: "Commandant", permissions: "Commandement", status: "Actif" },
+      { id: "AG-003", name: "Dr Chloé Robert", service: "CH", grade: "Directrice médicale", permissions: "Direction complète", status: "Actif" }
+    ];
+
+    const initialEmergencyCalls = [
+      { id:"APL-112-084", channel:"112", received:"21:42", location:"A6 — sortie 14", nature:"Accident corporel", priority:"P1", lead:"SP", engaged:"SP · CH · GN", status:"Coordination active", shared:"Localisation, risques, victimes estimées" },
+      { id:"APL-17-117", channel:"17", received:"21:28", location:"Senora Freeway", nature:"Véhicule signalé", priority:"P2", lead:"GN", engaged:"GN · PN", status:"Unités engagées", shared:"Signalement opérationnel et direction de fuite" },
+      { id:"APL-15-031", channel:"15", received:"20:51", location:"Place République", nature:"Malaise sur voie publique", priority:"P2", lead:"CH", engaged:"CH · SP", status:"Régulation médicale", shared:"Bilan secouriste utile à la régulation" }
+    ];
+
+    const initialTransmissions = [
+      { id:"TRS-2026-041", date:"10/08 · 21:46", from:"GN", to:"PARQUET", type:"Compte rendu OPJ", subject:"DOS-01 — saisine du parquet", confidentiality:"Judiciaire", status:"Reçu", payload:"Qualification proposée, procès-verbaux et pièces utiles", legal:"Direction de l'enquête par l'autorité judiciaire" },
+      { id:"TRS-2026-042", date:"10/08 · 21:44", from:"SP", to:"CH", type:"Bilan secouriste", subject:"APL-112-084 — 2 victimes", confidentiality:"Santé · minimum nécessaire", status:"Pris en charge", payload:"Constantes, mécanisme lésionnel, gestes effectués et heure d'arrivée", legal:"Continuité des soins" },
+      { id:"TRS-2026-043", date:"10/08 · 20:12", from:"CH", to:"ÉTAT CIVIL", type:"Volet administratif décès", subject:"DEC-2026-004", confidentiality:"Administratif", status:"À traiter", payload:"Identité, date, heure, commune et auteur du certificat — aucune donnée clinique", legal:"Déclaration d'état civil" },
+      { id:"TRS-2026-044", date:"10/08 · 19:35", from:"PRÉFECTURE", to:"GN", type:"Demande d'enquête administrative", subject:"PPA-001 — dossier SIA", confidentiality:"Restreint", status:"En attente", payload:"Identité et contrôle administratif demandé — pas de dossier médical", legal:"Instruction administrative armes" }
+    ];
+
+    const initialTasks = [
+      { id:"TAC-018", service:"GN", due:"22:15", title:"Valider la procédure DOS-01", owner:"OPJ de permanence", priority:"Haute", status:"À faire" },
+      { id:"TAC-019", service:"CH", due:"Immédiat", title:"Réguler l'appel APL-15-031", owner:"Médecin régulateur", priority:"Critique", status:"En cours" },
+      { id:"TAC-020", service:"SP", due:"22:05", title:"Transmettre le bilan du VSAV 12", owner:"Chef d'agrès", priority:"Haute", status:"À faire" },
+      { id:"TAC-021", service:"GVT", due:"11/08", title:"Enregistrer le volet décès DEC-2026-004", owner:"Officier d'état civil", priority:"Normale", status:"À faire" }
+    ];
+
+    const initialAudit = [
+      { time:"21:47:12", actor:"GND-0742", service:"GN", action:"Consultation", object:"DOS-01", result:"Autorisé", reason:"Enquête en cours" },
+      { time:"21:46:03", actor:"GND-0742", service:"GN", action:"Transmission", object:"TRS-2026-041", result:"Scellée", reason:"Saisine parquet" },
+      { time:"21:44:38", actor:"CH-019", service:"CH", action:"Lecture dossier", object:"PAT-FR-02", result:"Autorisé", reason:"Continuité des soins" },
+      { time:"21:43:51", actor:"PN-112", service:"PN", action:"Accès dossier médical", object:"PAT-FR-02", result:"Refusé", reason:"Hors habilitation / secret médical" }
+    ];
+
+    const initialConfig = {
+      orgName: "RÉPUBLIQUE FRANÇAISE",
+      agentName: "Noé Natter",
+      agentBadge: "GND-0742",
+      agentRole: "Administrateur"
+    };
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC33Dk6arN05Od3Hz7--XxIp0JTL-zCkVE",
+      authDomain: "mdt-fr.firebaseapp.com",
+      projectId: "mdt-fr",
+      storageBucket: "mdt-fr.firebasestorage.app",
+      messagingSenderId: "761306156349",
+      appId: "1:761306156349:web:476a1661689c1f67898954",
+      measurementId: "G-CZ2PXNJJ6N"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const firebaseAuth = firebase.auth();
+    const firestore = firebase.firestore();
+    firestore.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+    const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp;
+    let currentFirebaseUser = null;
+    let currentUserProfile = null;
+    let currentOrgId = null;
+    let creatingOrganization = false;
+    let liveUnsubscribers = [];
+    let remoteReady = false;
+    const remoteCollections = ["citizens","vehicles","interventions","reports","cases","patrols","medicalRecords","weaponPermits","deaths","civilDocuments","justiceCases","prisonTransfers","staff","emergencyCalls","transmissions","tasks","audit"];
+
+    // Cache local de secours : Firestore reste la source de vérité.
+    function getStore(key, fallback) {
+      const data = localStorage.getItem("mdt_" + key);
+      if (!data) {
+        localStorage.setItem("mdt_" + key, JSON.stringify(fallback));
+        return fallback;
+      }
+      return JSON.parse(data);
+    }
+
+    function setStore(key, data) {
+      localStorage.setItem("mdt_" + key, JSON.stringify(data));
+      if (remoteReady && currentOrgId && remoteCollections.includes(key)) syncCollection(key, data).catch(handleFirebaseError);
+    }
+
+    function recordId(key, item, index) {
+      return String(item.id || item.plate || item.uid || `${key}-${index}`).replace(/\//g,"-");
+    }
+
+    async function syncCollection(key, data) {
+      if (!canWriteCollection(key)) throw new Error("Votre rôle ne permet pas de modifier ce registre.");
+      const ref = firestore.collection("organizations").doc(currentOrgId).collection(key);
+      const existing = await ref.get();
+      const wanted = new Set(data.map((item,index)=>recordId(key,item,index)));
+      let batch = firestore.batch(); let operations = 0;
+      data.forEach((item,index)=>{ const id=recordId(key,item,index); batch.set(ref.doc(id), {...item, orgId:currentOrgId, updatedAt:serverTimestamp(), updatedBy:currentFirebaseUser.uid},{merge:true}); operations++; });
+      existing.docs.forEach(doc=>{ if(!wanted.has(doc.id)){batch.delete(doc.ref);operations++;} });
+      if(operations) await batch.commit();
+      setSyncState(true,"Synchronisé");
+    }
+
+    function canWriteCollection(key) {
+      if (!currentUserProfile || currentUserProfile.active === false) return false;
+      const role=currentUserProfile.role, service=currentUserProfile.service;
+      if (["owner","admin"].includes(role)) return true;
+      if (key === "medicalRecords") return service === "CH" && ["direction","doctor","medic"].includes(role);
+      if (["justiceCases","prisonTransfers"].includes(key)) return service === "GVT" && ["direction","magistrate","greffe"].includes(role);
+      if (key === "civilDocuments") return service === "GVT";
+      if (key === "staff") return role === "direction";
+      return ["direction","supervisor","opj","agent","doctor","medic","dispatcher"].includes(role);
+    }
+
+    function setSyncState(ok,label) {
+      const node=document.getElementById("syncStatus"); if(!node) return;
+      node.textContent=(ok?"● ":"◌ ")+label; node.classList.toggle("offline",!ok);
+    }
+
+    function handleFirebaseError(error) {
+      console.error(error); setSyncState(false,"Synchronisation interrompue");
+      notify(firebaseMessage(error));
+    }
+
+    function firebaseMessage(error) {
+      const code=error?.code||"";
+      const messages={"auth/invalid-credential":"Identifiants incorrects.","auth/email-already-in-use":"Cette adresse est déjà utilisée.","auth/weak-password":"Le mot de passe doit contenir au moins 8 caractères.","auth/too-many-requests":"Trop de tentatives. Réessayez plus tard.","permission-denied":"Accès refusé par les règles de sécurité.","auth/user-not-found":"Compte introuvable."};
+      return messages[code] || error?.message || "Une erreur Firebase est survenue.";
+    }
+
+    // Chargement de l'ensemble de la BD au démarrage
+    const db = {
+      services: getStore("services", initialServices),
+      citizens: getStore("citizens", initialCitizens),
+      vehicles: getStore("vehicles", initialVehicles),
+      interventions: getStore("interventions", initialInterventions),
+      reports: getStore("reports", initialReports),
+      cases: getStore("cases", initialCases),
+      patrols: getStore("patrols", initialPatrols),
+      medicalRecords: getStore("medicalRecords", initialMedicalRecords),
+      weaponPermits: getStore("weaponPermits", initialWeaponPermits),
+      deaths: getStore("deaths", initialDeaths),
+      civilDocuments: getStore("civilDocuments", initialCivilDocuments),
+      justiceCases: getStore("justiceCases", initialJusticeCases),
+      prisonTransfers: getStore("prisonTransfers", initialPrisonTransfers),
+      staff: getStore("staff", initialStaff),
+      emergencyCalls: getStore("emergencyCalls", initialEmergencyCalls),
+      transmissions: getStore("transmissions", initialTransmissions),
+      tasks: getStore("tasks", initialTasks),
+      audit: getStore("audit", initialAudit),
+      config: getStore("config", initialConfig)
+    };
+
+    // ==========================================
+    // ETAPE 3 : SYSTEME D'AUTHENTIFICATION ET DE ROUTAGE
+    // ==========================================
+
+    const pagesByService = {
+      GN: [["Tableau de bord","⌂"],["Centre 15·17·18","☎"],["Tâches","✓"],["Transmissions","⇄"],["Citoyens","♙"],["Véhicules","▣"],["Patrouilles","◉"],["Interventions","⚡"],["Rapports","▤"],["Dossiers","◇"],["Armes · SIA","⌖"],["Personnel","♜"],["Audit & accès","◈"]],
+      PN: [["Tableau de bord","⌂"],["Centre 15·17·18","☎"],["Tâches","✓"],["Transmissions","⇄"],["Citoyens","♙"],["Véhicules","▣"],["Patrouilles","◉"],["Interventions","⚡"],["Rapports","▤"],["Dossiers","◇"],["Armes · SIA","⌖"],["Personnel","♜"],["Audit & accès","◈"]],
+      SP: [["Tableau de bord","⌂"],["Centre 15·17·18","☎"],["Tâches","✓"],["Transmissions","⇄"],["Interventions","⚡"],["Patrouilles","◉"],["Rapports","▤"],["Personnel","♜"],["Audit & accès","◈"]],
+      CH: [["Tableau de bord","⌂"],["Centre 15·17·18","☎"],["Tâches","✓"],["Transmissions","⇄"],["Patients","✚"],["Armes · SIA","⌖"],["Interventions","⚡"],["Patrouilles","◉"],["Décès","†"],["Rapports","▤"],["Personnel","♜"],["Audit & accès","◈"]],
+      GVT: [["Tableau de bord","⌂"],["Tâches","✓"],["Transmissions","⇄"],["État civil","▦"],["Citoyens","♙"],["Justice","⚖"],["Prison","▥"],["Armes · SIA","⌖"],["Documents","▤"],["Personnel","♜"],["Audit & accès","◈"]]
+    };
+
+    function currentPages() {
+      return (pagesByService[activeService.code] || pagesByService.GN)
+        .filter(([name]) => name !== "Audit & accès" || ["owner","admin","direction"].includes(currentUserProfile?.role))
+        .map(([name, icon]) => ({ name, icon }));
+    }
+
+    let activePage = "Tableau de bord";
+    let activeService = db.services[0];
+    const $ = id => document.getElementById(id);
+
+    // Initialise les sélecteurs de services (Login et App)
+    function buildServices() {
+      const allowed = currentUserProfile && !["owner","admin"].includes(currentUserProfile.role)
+        ? db.services.filter(s => s.code === currentUserProfile.service && s.enabled)
+        : db.services.filter(s => s.enabled);
+      const selectHTML = allowed.map(s => `<option value="${s.code}">${s.name}</option>`).join("");
+      $("serviceSelect").innerHTML = selectHTML;
+
+      // Service logos en bas à droite de l'art de login
+      $("serviceLogos").innerHTML = db.services.filter(s => s.enabled).map(s => `
+        <div class="service-logo">
+          <b style="color:${s.color}">${s.icon}</b>
+          <small>${s.code}</small>
+        </div>
+      `).join("");
+    }
+
+    // Met à jour le service actif visuel
+    function selectService(code) {
+      const s = db.services.find(x => x.code === code) || db.services[0];
+      activeService = s;
+      $("serviceName").textContent = s.name;
+      $("serviceIcon").textContent = s.icon;
+      $("serviceIcon").style.background = s.color;
+      $("serviceSelect").value = s.code;
+    }
+
+    // Construit le menu de navigation
+    function renderNav() {
+      const activeAppeals = db.interventions.filter(i => i.status === "En cours").length;
+      $("nav").innerHTML = currentPages().map(p => `
+        <button class="${p.name === activePage ? 'active' : ''}" onclick="navigateToPage('${p.name}')">
+          <span>${p.icon}</span>${p.name}
+          ${p.name === "Interventions" && activeAppeals > 0 ? `<b>${activeAppeals}</b>` : ""}
+        </button>
+      `).join("");
+    }
+
+    // Fonction de routage des pages
+    function navigateToPage(pageName) {
+      activePage = pageName;
+      $("pageTitle").textContent = pageName;
+
+      const descriptions = {
+        "Tableau de bord": "Situation opérationnelle du service actif.",
+        "Citoyens": "Registre d'état civil, antécédents judiciaires et permis nationaux.",
+        "Véhicules": "Registre national des immatriculations et avis de recherche actifs.",
+        "Interventions": "Gestion des appels d'urgence et répartition des patrouilles.",
+        "Rapports": "Rédaction et consignation de rapports officiels d'intervention.",
+        "Dossiers": "Dossiers d'enquête criminelle et mandats d'arrêt émis.",
+        "Patrouilles": "Création, composition et suivi opérationnel des unités engagées.",
+        "Centre 15·17·18": "Coordination des appels 15, 17, 18 et 112 selon le service pilote et le besoin opérationnel.",
+        "Tâches": "Corbeille de travail, validations hiérarchiques et échéances du service.",
+        "Transmissions": "Échanges interservices ciblés, scellés et traçables selon le besoin d'en connaître.",
+        "Patients": "Dossiers patients, antécédents et suivi médical confidentiel.",
+        "Armes · SIA": "Instruction administrative des armes : certificat, préfecture/SIA et enquête administrative cloisonnée.",
+        "Décès": "Déclarations médicales de décès et transmission à l'état civil.",
+        "État civil": "Recensement national et délivrance des documents officiels.",
+        "Justice": "Affaires transmises par les forces de l'ordre et audiences du tribunal.",
+        "Prison": "Clôture judiciaire, condamnations et transferts pénitentiaires.",
+        "Documents": "Création et suivi des papiers officiels des citoyens.",
+        "Personnel": "Gestion interne du service, grades et habilitations.",
+        "Audit & accès": "Habilitations par rôle, journal des consultations et refus d'accès."
+      };
+
+      $("pageDescription").textContent = descriptions[pageName] || "";
+      renderNav();
+
+      // Appel du moteur de rendu dynamique
+      renderDynamicPage();
+    }
+
+    // Horloge temps réel
+    function startClock() {
+      function tick() {
+        const d = new Date();
+        const dateStr = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
+        const timeStr = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        $("clock").innerHTML = `<small>${dateStr}</small><strong>${timeStr}</strong>`;
+      }
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    // Notification toast rapide
+    function notify(message) {
+      const t = $("toast");
+      t.textContent = message;
+      t.classList.remove("hidden");
+      setTimeout(() => {
+        t.classList.add("hidden");
+      }, 2500);
+    }
+
+    function applyProfile(profile, organization) {
+      db.config.agentName=profile.name; db.config.agentBadge=profile.badge; db.config.agentRole=roleLabel(profile.role); db.config.orgName=organization.name;
+      $("orgSmall").textContent=organization.name.toUpperCase();
+      $("agentNameDisplay").textContent=profile.name;
+      $("agentRoleDisplay").textContent=`${roleLabel(profile.role)} • ${profile.badge}`;
+      $("agentAvatar").textContent=profile.name.trim().split(/\s+/).filter(Boolean).map(n=>n[0]).join("").toUpperCase().slice(0,2);
+      buildServices(); selectService(profile.service || "GN");
+    }
+
+    function roleLabel(role){return ({owner:"Propriétaire",admin:"Administrateur",direction:"Direction",supervisor:"Superviseur",opj:"OPJ",agent:"Agent",doctor:"Médecin",medic:"Soignant",dispatcher:"Opérateur",magistrate:"Magistrat",greffe:"Greffe"})[role]||role;}
+
+    async function loadSession(user) {
+      const userSnap=await firestore.collection("users").doc(user.uid).get();
+      if(!userSnap.exists) throw new Error("Profil MDT absent. Contactez l'administrateur de votre serveur.");
+      const profile=userSnap.data(); if(profile.active===false) throw new Error("Ce compte a été désactivé.");
+      const orgSnap=await firestore.collection("organizations").doc(profile.orgId).get();
+      if(!orgSnap.exists) throw new Error("Organisation introuvable.");
+      currentFirebaseUser=user; currentUserProfile=profile; currentOrgId=profile.orgId;
+      applyProfile(profile,orgSnap.data()); subscribeToOrganization();
+      $("login").classList.add("hidden"); $("application").classList.remove("hidden"); navigateToPage("Tableau de bord");
+      setSyncState(true,"Connecté au cloud");
+    }
+
+    function subscribeToOrganization() {
+      liveUnsubscribers.forEach(fn=>fn()); liveUnsubscribers=[]; remoteReady=false;
+      remoteCollections.filter(canReadCollection).forEach(key=>{
+        let query=firestore.collection("organizations").doc(currentOrgId).collection(key);
+        if(key==="staff" && !["owner","admin"].includes(currentUserProfile.role)) query=query.where("service","==",currentUserProfile.service);
+        if(["reports","cases"].includes(key) && !["owner","admin"].includes(currentUserProfile.role)) query=query.where("service","==",currentUserProfile.service);
+        if(key==="transmissions" && !["owner","admin"].includes(currentUserProfile.role)) query=query.where("participants","array-contains",currentUserProfile.service);
+        const unsub=query.onSnapshot(snapshot=>{
+          if(!snapshot.empty){ db[key]=snapshot.docs.map(doc=>({__docId:doc.id,...doc.data()})); localStorage.setItem("mdt_"+key,JSON.stringify(db[key])); }
+          if(!$("application").classList.contains("hidden")) renderDynamicPage();
+          remoteReady=true; setSyncState(!snapshot.metadata.fromCache,snapshot.metadata.fromCache?"Mode hors-ligne":"Synchronisé");
+        },handleFirebaseError); liveUnsubscribers.push(unsub);
+      });
+    }
+
+    function canReadCollection(key){
+      const s=currentUserProfile.service,r=currentUserProfile.role;
+      if(["owner","admin"].includes(r)) return true;
+      if(key==="audit") return ["owner","admin","direction"].includes(r);
+      if(key==="medicalRecords") return s==="CH";
+      if(key==="deaths") return ["CH","GVT"].includes(s);
+      if(["justiceCases","prisonTransfers","civilDocuments"].includes(key)) return s==="GVT";
+      if(["vehicles","cases"].includes(key)) return ["GN","PN","GVT"].includes(s);
+      if(key==="weaponPermits") return ["CH","GN","PN","GVT"].includes(s);
+      return true;
+    }
+
+    async function seedOrganization(orgId, owner) {
+      const datasets={citizens:initialCitizens,vehicles:initialVehicles,interventions:initialInterventions,reports:initialReports,cases:initialCases,patrols:initialPatrols,medicalRecords:initialMedicalRecords,weaponPermits:initialWeaponPermits,deaths:initialDeaths,civilDocuments:initialCivilDocuments,justiceCases:initialJusticeCases,prisonTransfers:initialPrisonTransfers,staff:[{id:owner.badge,name:owner.name,service:owner.service,grade:"Administrateur fondateur",permissions:"Direction complète",status:"Actif",uid:owner.uid}],emergencyCalls:initialEmergencyCalls,transmissions:initialTransmissions,tasks:initialTasks,audit:initialAudit};
+      let batch=firestore.batch(); let count=0;
+      for(const [key,items] of Object.entries(datasets)) for(let i=0;i<items.length;i++){const item=items[i],id=recordId(key,item,i);const normalized={...item,orgId,createdAt:serverTimestamp(),createdBy:owner.uid};if(key==="transmissions")normalized.participants=transmissionParticipants(item);if(["reports","cases"].includes(key))normalized.service=item.service||owner.service;batch.set(firestore.collection("organizations").doc(orgId).collection(key).doc(id),normalized);if(++count===450){await batch.commit();batch=firestore.batch();count=0;}}
+      if(count) await batch.commit();
+    }
+
+    function transmissionParticipants(item){const government=["PARQUET","TRIBUNAL","PRÉFECTURE","ÉTAT CIVIL","PRISON","GVT"];const values=[item.from,item.to].map(v=>government.includes(v)?"GVT":v);return [...new Set(values)];}
+
+    $("loginTab").onclick=()=>{$("loginTab").classList.add("active");$("createOrgTab").classList.remove("active");$("loginForm").classList.remove("hidden");$("createOrgForm").classList.add("hidden");};
+    $("createOrgTab").onclick=()=>{$("createOrgTab").classList.add("active");$("loginTab").classList.remove("active");$("createOrgForm").classList.remove("hidden");$("loginForm").classList.add("hidden");};
+
+    // Connexion Firebase Auth
+    $("loginForm").onsubmit = async (e) => {
+      e.preventDefault();
+      try{setSyncState(false,"Connexion…");await firebaseAuth.signInWithEmailAndPassword($("loginEmail").value.trim(),$("loginPassword").value);}
+      catch(error){handleFirebaseError(error);}
+    };
+
+    $("createOrgForm").onsubmit=async e=>{e.preventDefault();let credential;creatingOrganization=true;
+      try{
+        credential=await firebaseAuth.createUserWithEmailAndPassword($("newOwnerEmail").value.trim(),$("newOwnerPassword").value);
+        const uid=credential.user.uid, orgId="org_"+uid;
+        const profile={uid,orgId,name:$("newOwnerName").value.trim(),badge:$("newOwnerBadge").value.trim().toUpperCase(),service:$("newOwnerService").value,role:"owner",active:true,email:$("newOwnerEmail").value.trim().toLowerCase(),createdAt:serverTimestamp()};
+        await firestore.collection("organizations").doc(orgId).set({name:$("newOrgName").value.trim(),ownerUid:uid,plan:"Découverte",status:"active",createdAt:serverTimestamp(),limits:{users:25,storageMb:500}});
+        await firestore.collection("users").doc(uid).set(profile); await seedOrganization(orgId,profile); creatingOrganization=false; await loadSession(credential.user);
+        notify("Organisation créée. Bienvenue dans votre MDT !");
+      }catch(error){creatingOrganization=false;if(credential?.user) await credential.user.delete().catch(()=>{});handleFirebaseError(error);}
+    };
+
+    $("resetPasswordBtn").onclick=async()=>{const email=$("loginEmail").value.trim();if(!email)return notify("Saisissez d'abord votre adresse e-mail.");try{await firebaseAuth.sendPasswordResetEmail(email);notify("E-mail de réinitialisation envoyé.");}catch(error){handleFirebaseError(error);}};
+
+    // Déconnexion
+    $("logout").onclick = async () => {
+      liveUnsubscribers.forEach(fn=>fn()); liveUnsubscribers=[]; remoteReady=false; await firebaseAuth.signOut();
+      $("application").classList.add("hidden");
+      $("login").classList.remove("hidden");
+      notify("Déconnexion sécurisée effectuée.");
+    };
+
+    // Gestion du sélecteur de service en sidebar
+    $("serviceSelect").onchange = (e) => {
+      selectService(e.target.value);
+      notify(`Service actif : ${activeService.name}`);
+      navigateToPage("Tableau de bord");
+    };
+
+    firebaseAuth.onAuthStateChanged(user=>{if(user && !currentFirebaseUser && !creatingOrganization)loadSession(user).catch(async error=>{handleFirebaseError(error);await firebaseAuth.signOut();});});
+
+    // Initialisation au chargement
+    buildServices();
+    startClock();
+
+
+    // ==========================================
+    // ETAPE 4, 5 & 6 : RENDU COMPLET ET INTERACTIF DES MODULES
+    // ==========================================
+
+    let citizensFilter = "Tous";
+    let citizensSearch = "";
+    let vehiclesSearch = "";
+    let interventionsFilter = "Tous";
+    let reportsSearch = "";
+    let casesFilter = "Tous";
+
+    function renderDynamicPage() {
+      const actions = $("headerActions");
+      actions.innerHTML = ""; // Vider par défaut
+
+      const content = $("dynamicPageContent");
+
+      if (activePage === "Tableau de bord") {
+        // --- RENDU TABLEAU DE BORD ---
+        const totalAgents = 24;
+        const totalInterventions = db.interventions.filter(i => i.status === "En cours").length;
+        const totalReports = db.reports.length;
+        const totalWanted = db.citizens.filter(c => c.wanted).length + db.vehicles.filter(v => v.wanted).length;
+
+        content.innerHTML = `
+          <div class="stats">
+            <article class="stat">
+              <div>
+                <span>Agents en service</span>
+                <strong>${totalAgents}</strong>
+                <small>+3 depuis 18h</small>
+              </div>
+              <b>♙</b>
+            </article>
+            <article class="stat red">
+              <div>
+                <span>Interventions actives</span>
+                <strong>${String(totalInterventions).padStart(2, '0')}</strong>
+                <small>En cours de traitement</small>
+              </div>
+              <b>⚡</b>
+            </article>
+            <article class="stat green">
+              <div>
+                <span>Rapports enregistrés</span>
+                <strong>${String(totalReports).padStart(2, '0')}</strong>
+                <small>Persistés en base</small>
+              </div>
+              <b>▤</b>
+            </article>
+            <article class="stat gold">
+              <div>
+                <span>Avis de recherche</span>
+                <strong>${String(totalWanted).padStart(2, '0')}</strong>
+                <small>Cibles prioritaires</small>
+              </div>
+              <b>◇</b>
+            </article>
+          </div>
+
+          <div class="grid">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <span class="eyebrow">TEMPS RÉEL</span>
+                  <h2>Activité récente</h2>
+                </div>
+                <button class="link" onclick="navigateToPage('Interventions')">Voir tout →</button>
+              </div>
+              <div id="events">
+                ${db.interventions.map(e => `
+                  <article class="event">
+                    <time>${e.time}</time>
+                    <i class="dot" style="background: ${e.status === 'En cours' ? 'var(--status-danger)' : 'var(--status-success)'};"></i>
+                    <div>
+                      <small>INTERVENTION • ${e.service} • APPEL</small>
+                      <strong>${e.title}</strong>
+                    </div>
+                    <span class="badge ${e.badgeClass}">${e.priority}</span>
+                  </article>
+                `).join("")}
+              </div>
+            </section>
+
+            <aside class="panel quick">
+              <div class="panel-head">
+                <div>
+                  <span class="eyebrow">ACCÈS DIRECT</span>
+                  <h2>Actions rapides</h2>
+                </div>
+              </div>
+              <button onclick="navigateToPage('Citoyens')">
+                <span>♙</span>
+                <div>
+                  <strong>Rechercher un citoyen</strong>
+                  <small>Identité, antécédents et permis</small>
+                </div>
+                →
+              </button>
+              <button onclick="navigateToPage('Véhicules')">
+                <span>▣</span>
+                <div>
+                  <strong>Contrôler un véhicule</strong>
+                  <small>Immatriculation et propriétaire</small>
+                </div>
+                →
+              </button>
+              <button onclick="navigateToPage('Interventions')">
+                <span>⚡</span>
+                <div>
+                  <strong>Créer une intervention</strong>
+                  <small>Déployer et coordonner les unités</small>
+                </div>
+                →
+              </button>
+              <button onclick="navigateToPage('Dossiers')">
+                <span>◇</span>
+                <div>
+                  <strong>Ouvrir un dossier</strong>
+                  <small>Enquête et procédure judiciaire</small>
+                </div>
+                →
+              </button>
+            </aside>
+          </div>
+        `;
+      }
+
+      else if (activePage === "Citoyens") {
+        // --- RENDU REGISTRE CITOYENS ---
+        actions.innerHTML = `<button class="primary" onclick="openCreateCitizenModal()">＋ Enregistrer un citoyen</button>`;
+
+        const filtered = db.citizens.filter(c => {
+          const matchSearch = `${c.firstname} ${c.lastname} ${c.id} ${c.phone}`.toLowerCase().includes(citizensSearch.toLowerCase());
+          if (citizensFilter === "Recherchés") return matchSearch && c.wanted;
+          if (citizensFilter === "Permis Suspendu") return matchSearch && c.driverLicense === "Suspendu";
+          return matchSearch;
+        });
+
+        content.innerHTML = `
+          <div class="tabs">
+            <button class="${citizensFilter === 'Tous' ? 'active' : ''}" onclick="setCitizensFilter('Tous')">Tous</button>
+            <button class="${citizensFilter === 'Recherchés' ? 'active' : ''}" onclick="setCitizensFilter('Recherchés')">Recherchés</button>
+            <button class="${citizensFilter === 'Permis Suspendu' ? 'active' : ''}" onclick="setCitizensFilter('Permis Suspendu')">Permis Suspendu</button>
+          </div>
+
+          <div style="margin-bottom:15px; display:flex; gap:10px;">
+            <input type="text" id="citizenSearchInput" class="field" style="padding:10px;" placeholder="Rechercher par nom, ID ou téléphone..." value="${citizensSearch}">
+          </div>
+
+          <div class="table">
+            <div class="row head">
+              <span>Identifiant</span>
+              <span>Nom / Prénom</span>
+              <span>Téléphone</span>
+              <span>Permis</span>
+              <span>Recherche</span>
+            </div>
+            <div>
+              ${filtered.map(c => `
+                <div class="row clickable" onclick="viewCitizenDetails('${c.id}')">
+                  <span style="font-family:monospace; font-weight:bold; color:var(--accent-gold);">${c.id}</span>
+                  <span><strong>${c.lastname.toUpperCase()}</strong> ${c.firstname}</span>
+                  <span>${c.phone || "Non renseigné"}</span>
+                  <span class="${c.driverLicense === 'Valide' ? 'good' : 'bad'}">${c.driverLicense}</span>
+                  <span>${c.wanted ? '<span class="badge urgent">Avis Actif</span>' : '<span class="badge">Aucun</span>'}</span>
+                </div>
+              `).join("")}
+              ${filtered.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--text-muted);">Aucun citoyen correspondant.</div>` : ""}
+            </div>
+          </div>
+        `;
+
+        $("citizenSearchInput").oninput = (e) => {
+          citizensSearch = e.target.value;
+          renderDynamicPage();
+        };
+        $("citizenSearchInput").focus();
+      }
+
+      else if (activePage === "Véhicules") {
+        // --- RENDU REGISTRE VEHICULES ---
+        actions.innerHTML = `<button class="primary" onclick="openCreateVehicleModal()">＋ Immatriculer un véhicule</button>`;
+
+        const filtered = db.vehicles.filter(v => {
+          return `${v.plate} ${v.model} ${v.owner} ${v.color}`.toLowerCase().includes(vehiclesSearch.toLowerCase());
+        });
+
+        content.innerHTML = `
+          <div style="margin-bottom:15px;">
+            <input type="text" id="vehicleSearchInput" class="field" style="padding:10px;" placeholder="Rechercher par plaque, marque, propriétaire..." value="${vehiclesSearch}">
+          </div>
+
+          <div class="table">
+            <div class="row head">
+              <span>Plaque</span>
+              <span>Modèle / Couleur</span>
+              <span>Propriétaire</span>
+              <span>Signalement</span>
+              <span>Action</span>
+            </div>
+            <div>
+              ${filtered.map(v => `
+                <div class="row">
+                  <span style="font-family:monospace; font-weight:bold; color:var(--accent-gold);">${v.plate}</span>
+                  <span>${v.model} (${v.color})</span>
+                  <span class="clickable" style="text-decoration:underline;" onclick="viewCitizenDetails('${v.ownerId}')">${v.owner}</span>
+                  <span>${v.wanted ? `<span class="badge urgent" title="${v.reason}">Recherché</span>` : '<span class="badge done">En règle</span>'}</span>
+                  <span><button class="primary" style="padding:5px 10px; font-size:8px;" onclick="viewVehicleDetails('${v.plate}')">Consulter</button></span>
+                </div>
+              `).join("")}
+              ${filtered.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--text-muted);">Aucun véhicule répertorié.</div>` : ""}
+            </div>
+          </div>
+        `;
+
+        $("vehicleSearchInput").oninput = (e) => {
+          vehiclesSearch = e.target.value;
+          renderDynamicPage();
+        };
+        $("vehicleSearchInput").focus();
+      }
+
+      else if (activePage === "Interventions") {
+        // --- 5. INTERVENTIONS ---
+        actions.innerHTML = `<button class="primary" onclick="openCreateInterventionModal()">＋ Créer un appel</button>`;
+
+        const filtered = db.interventions.filter(i => {
+          if (interventionsFilter === "En cours") return i.status === "En cours";
+          if (interventionsFilter === "Clôturées") return i.status === "Traité" || i.status === "Clôturée";
+          return true;
+        });
+
+        content.innerHTML = `
+          <div class="tabs">
+            <button class="${interventionsFilter === 'Tous' ? 'active' : ''}" onclick="setInterventionsFilter('Tous')">Tous</button>
+            <button class="${interventionsFilter === 'En cours' ? 'active' : ''}" onclick="setInterventionsFilter('En cours')">En cours</button>
+            <button class="${interventionsFilter === 'Clôturées' ? 'active' : ''}" onclick="setInterventionsFilter('Clôturées')">Clôturées</button>
+          </div>
+
+          <div class="table">
+            <div class="row head">
+              <span>ID / Heure</span>
+              <span>Titre de l'appel</span>
+              <span>Service</span>
+              <span>Urgence</span>
+              <span>État / Action</span>
+            </div>
+            <div>
+              ${filtered.map(i => `
+                <div class="row">
+                  <span style="font-family:monospace;">${i.id} (${i.time})</span>
+                  <span><strong>${i.title}</strong><br><small style="color:var(--text-muted);">${i.desc}</small></span>
+                  <span><span class="badge">${i.service}</span></span>
+                  <span><span class="badge ${i.badgeClass}">${i.priority}</span></span>
+                  <span>
+                    ${i.status === "En cours" ? `
+                      <button class="primary" style="background:var(--status-success); color:#172235; padding:5px 8px; font-size:8px;" onclick="closeIntervention('${i.id}')">Clôturer</button>
+                    ` : `
+                      <span class="good">Traité</span>
+                    `}
+                  </span>
+                </div>
+              `).join("")}
+              ${filtered.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--text-muted);">Aucune intervention correspondante.</div>` : ""}
+            </div>
+          </div>
+        `;
+      }
+
+      else if (activePage === "Rapports") {
+        // --- 5. RAPPORTS ---
+        actions.innerHTML = `<button class="primary" onclick="openCreateReportModal()">＋ Déposer un rapport</button>`;
+
+        const filtered = db.reports.filter(r => {
+          return `${r.title} ${r.citizenName} ${r.author} ${r.content}`.toLowerCase().includes(reportsSearch.toLowerCase());
+        });
+
+        content.innerHTML = `
+          <div style="margin-bottom:15px;">
+            <input type="text" id="reportSearchInput" class="field" style="padding:10px;" placeholder="Filtrer les rapports..." value="${reportsSearch}">
+          </div>
+
+          <div class="table">
+            <div class="row head">
+              <span>Date</span>
+              <span>Titre du rapport</span>
+              <span>Rédacteur</span>
+              <span>Citoyen lié</span>
+              <span>Action</span>
+            </div>
+            <div>
+              ${filtered.map(r => `
+                <div class="row">
+                  <span>${r.date}</span>
+                  <span><strong>${r.title}</strong></span>
+                  <span>${r.author}</span>
+                  <span class="clickable" style="text-decoration:underline;" onclick="viewCitizenDetails('${r.citizenId}')">${r.citizenName}</span>
+                  <span><button class="primary" style="padding:5px 10px; font-size:8px;" onclick="viewReportDetails('${r.id}')">Ouvrir</button></span>
+                </div>
+              `).join("")}
+              ${filtered.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--text-muted);">Aucun rapport répertorié.</div>` : ""}
+            </div>
+          </div>
+        `;
+
+        $("reportSearchInput").oninput = (e) => {
+          reportsSearch = e.target.value;
+          renderDynamicPage();
+        };
+        $("reportSearchInput").focus();
+      }
+
+      else if (activePage === "Dossiers") {
+        // --- 6. DOSSIERS ---
+        actions.innerHTML = `<button class="primary" onclick="openCreateCaseModal()">＋ Ouvrir une enquête</button>`;
+
+        const filtered = db.cases.filter(c => {
+          if (casesFilter === "Actif") return c.status === "Actif";
+          if (casesFilter === "Archivé") return c.status === "Archivé";
+          return true;
+        });
+
+        content.innerHTML = `
+          <div class="tabs">
+            <button class="${casesFilter === 'Tous' ? 'active' : ''}" onclick="setCasesFilter('Tous')">Tous</button>
+            <button class="${casesFilter === 'Actif' ? 'active' : ''}" onclick="setCasesFilter('Actif')">Actifs</button>
+            <button class="${casesFilter === 'Archivé' ? 'active' : ''}" onclick="setCasesFilter('Archivé')">Archivés</button>
+          </div>
+
+          <div class="table">
+            <div class="row head">
+              <span>ID</span>
+              <span>Titre de l'enquête</span>
+              <span>Description rapide</span>
+              <span>Suspect principal</span>
+              <span>Statut / Action</span>
+            </div>
+            <div>
+              ${filtered.map(c => `
+                <div class="row">
+                  <span style="font-family:monospace; font-weight:bold; color:var(--accent-gold);">${c.id}</span>
+                  <span><strong>${c.title}</strong></span>
+                  <span>${c.desc}</span>
+                  <span class="clickable" style="text-decoration:underline;" onclick="viewCitizenDetails('${c.citizenId}')">${c.citizenName}</span>
+                  <span>
+                    <span class="badge ${c.status === 'Actif' ? 'urgent' : ''}">${c.status}</span>
+                    ${c.status === "Actif" ? `
+                      <button class="primary" style="padding:4px 6px; font-size:8px; margin-left:5px; background:var(--status-success); color:#172235;" onclick="archiveCase('${c.id}')">Archiver</button>
+                    ` : ""}
+                  </span>
+                </div>
+              `).join("")}
+              ${filtered.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--text-muted);">Aucun dossier criminel.</div>` : ""}
+            </div>
+          </div>
+        `;
+      }
+
+      else if (activePage === "Patrouilles") {
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('patrol')">＋ Créer une patrouille</button>`;
+        const patrols = db.patrols.filter(p => p.service === activeService.code);
+        content.innerHTML = premiumRegister(
+          "UNITÉS OPÉRATIONNELLES", "Patrouilles du service",
+          ["Indicatif", "Chef d'unité", "Composition", "Véhicule", "Statut"],
+          patrols.map(p => [p.name, p.leader, p.members, p.vehicle, p.status]),
+          "Aucune patrouille affectée à ce service."
+        );
+      }
+
+      else if (activePage === "Centre 15·17·18") {
+        actions.innerHTML = `<button class="primary" onclick="openEmergencyModal()">＋ Prendre un appel</button>`;
+        content.innerHTML = workflowNotice("Une coordination, pas un dossier unique", "Le 15 assure la régulation médicale, le 17 la police-secours, le 18 les secours et le 112 oriente l'appel. Chaque service ne reçoit que la synthèse nécessaire à son engagement.") + premiumRegister(
+          "CHAÎNE D'URGENCE", "Appels et coordination interservices",
+          ["Canal / appel", "Lieu · nature", "Priorité", "Pilote / engagés", "Statut"],
+          db.emergencyCalls.map(c => [`${c.channel} · ${c.id}`, `${c.location}<br><small>${c.nature}</small>`, c.priority, `${c.lead}<br><small>${c.engaged}</small>`, c.status]), "Aucun appel actif."
+        );
+      }
+
+      else if (activePage === "Tâches") {
+        const visible = db.tasks.filter(t => t.service === activeService.code);
+        content.innerHTML = premiumRegister("CORBEILLE MÉTIER", "Actions à valider", ["Référence", "Échéance", "Action", "Responsable", "État"], visible.map(t => [t.id,t.due,t.title,t.owner,t.status]), "Aucune tâche pour ce service.");
+      }
+
+      else if (activePage === "Transmissions") {
+        actions.innerHTML = `<button class="primary" onclick="openTransmissionModal()">＋ Nouvelle transmission</button>`;
+        const aliases = activeService.code === "GVT" ? ["GVT","PARQUET","TRIBUNAL","PRÉFECTURE","ÉTAT CIVIL","PRISON"] : [activeService.code];
+        const visible = db.transmissions.filter(t => aliases.includes(t.from) || aliases.includes(t.to));
+        content.innerHTML = workflowNotice("Principe du besoin d'en connaître", "Une transmission indique sa finalité, son destinataire et son niveau de confidentialité. Le dossier source reste dans le service producteur ; seules les pièces nécessaires sont remises.") + premiumRegister(
+          "MESSAGERIE SÉCURISÉE", "Flux entrants et sortants",
+          ["Référence / date", "De → vers", "Objet", "Niveau", "Statut"],
+          visible.map(t => [`${t.id}<br><small>${t.date}</small>`, `${t.from} → ${t.to}`, `${t.subject}<br><small>${t.type}</small>`, t.confidentiality, t.status]), "Aucune transmission pour ce service."
+        );
+      }
+
+      else if (activePage === "Patients") {
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('patient')">＋ Créer un dossier patient</button>`;
+        content.innerHTML = premiumRegister(
+          "SECRET MÉDICAL", "Dossiers patients",
+          ["Dossier", "Patient", "Groupe sanguin", "Allergies", "État"],
+          db.medicalRecords.map(r => [r.id, r.patient, r.blood, r.allergies, r.condition]),
+          "Aucun dossier patient."
+        ) + workflowNotice("Accès réservé au personnel hospitalier habilité", "Les forces de l'ordre ne voient pas le contenu médical. Seuls les certificats explicitement transmis leur sont accessibles.");
+      }
+
+      else if (activePage === "Armes · SIA") {
+        const isMedical = activeService.code === "CH";
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('weapon')">＋ Nouvelle demande</button>`;
+        content.innerHTML = workflowNotice(
+          "Circuit interservices sécurisé",
+          isMedical
+            ? "Le médecin établit un certificat destiné au dossier administratif. Le contenu du dossier patient reste couvert par le secret médical."
+            : "La préfecture instruit le dossier dans le SIA et peut demander une enquête administrative. Les forces de l'ordre ne consultent jamais le dossier médical."
+        ) + premiumRegister(
+          "AUTORISATIONS RÉGLEMENTÉES", "Demandes de permis de port d'armes",
+          ["Référence", "Demandeur", "Avis médical", "Contrôle FDO", "Étape"],
+          db.weaponPermits.map(p => [p.id, p.citizen, p.medicalStatus, p.policeStatus, p.status]),
+          "Aucune demande en cours."
+        );
+      }
+
+      else if (activePage === "Décès") {
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('death')">＋ Déclarer un décès</button>`;
+        content.innerHTML = premiumRegister(
+          "REGISTRE MÉDICO-LÉGAL", "Déclarations de décès",
+          ["Référence", "Personne", "Date", "Médecin déclarant", "Transmission"],
+          db.deaths.map(d => [d.id, d.citizen, d.date, d.doctor, d.status]),
+          "Aucune déclaration de décès."
+        );
+      }
+
+      else if (activePage === "État civil" || activePage === "Documents") {
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('document')">＋ Créer un document</button>`;
+        content.innerHTML = premiumRegister(
+          "REGISTRE NATIONAL", activePage === "État civil" ? "Recensement et état civil" : "Documents officiels",
+          ["Référence", "Citoyen", "Type de document", "Numéro", "Statut"],
+          db.civilDocuments.map(d => [d.id, d.citizen, d.type, d.number, d.status]),
+          "Aucun document officiel."
+        );
+      }
+
+      else if (activePage === "Justice") {
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('justice')">＋ Ouvrir une procédure</button>`;
+        content.innerHTML = workflowNotice(
+          "Passerelle forces de l'ordre → tribunal",
+          "Seuls les dossiers signalés comme nécessitant une audience apparaissent ici. Le tribunal peut instruire, clôturer ou préparer un transfert pénitentiaire."
+        ) + premiumRegister(
+          "TRIBUNAL", "Affaires judiciaires transmises",
+          ["Affaire", "Prévenu", "Dossier source", "Motif", "Statut"],
+          db.justiceCases.map(j => [j.id, j.citizen, j.source, j.reason, j.status]),
+          "Aucune affaire transmise au tribunal."
+        );
+      }
+
+      else if (activePage === "Prison") {
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('prison')">＋ Préparer un écrou</button>`;
+        content.innerHTML = premiumRegister(
+          "ADMINISTRATION PÉNITENTIAIRE", "Condamnations et transferts",
+          ["Écrou", "Détenu", "Affaire", "Peine", "Établissement"],
+          db.prisonTransfers.map(p => [p.id, p.citizen, p.caseId, p.sentence, p.prison]),
+          "Aucun transfert pénitentiaire."
+        );
+      }
+
+      else if (activePage === "Personnel") {
+        const canManage=["owner","admin","direction"].includes(currentUserProfile?.role);
+        actions.innerHTML = canManage ? `<button class="primary" onclick="openCreateStaffModal()">＋ Créer un compte</button>` : "";
+        const staff = db.staff.filter(s => s.service === activeService.code);
+        content.innerHTML = workflowNotice(
+          "Administration cloisonnée",
+          `La direction ${activeService.name} gère uniquement ses propres membres, grades et habilitations. Aucun accès aux personnels des autres institutions.`
+        ) + premiumRegister(
+          "DIRECTION DU SERVICE", "Personnel et habilitations",
+          ["Matricule", "Nom", "Grade", "Permissions", "Statut"],
+          staff.map(s => [s.id, s.name, s.grade, s.permissions, s.status]),
+          "Aucun membre enregistré dans ce service."
+        );
+      }
+
+
+      else if (activePage === "Audit & accès") {
+        const rights = {
+          GN:"Identité · véhicules · procédures · police judiciaire · appels 17/112",
+          PN:"Identité · véhicules · procédures · police judiciaire · appels 17/112",
+          SP:"Secours · bilans secouristes · moyens engagés · appels 18/112",
+          CH:"Dossiers patients · régulation 15 · soins · certificats médicaux",
+          GVT:"État civil · préfecture · parquet/tribunal · pénitentiaire selon le rôle"
+        };
+        content.innerHTML = workflowNotice(`Périmètre actif : ${activeService.name}`, rights[activeService.code]) + premiumRegister(
+          "JOURNAL INALTÉRABLE", "Dernières traces de sécurité", ["Heure", "Agent / service", "Action", "Objet", "Résultat"],
+          db.audit.map(a => [a.time, `${a.actor} · ${a.service}`, `${a.action}<br><small>${a.reason}</small>`, a.object, a.result]), "Aucune trace."
+        );
+      }
+    }
+
+    function premiumRegister(eyebrow, title, headers, rows, emptyMessage) {
+      return `
+        <section class="panel">
+          <div class="panel-head">
+            <div><span class="eyebrow">${eyebrow}</span><h2>${title}</h2></div>
+            <span class="badge done">${rows.length} ENREGISTREMENT(S)</span>
+          </div>
+          <div class="table">
+            <div class="row head">${headers.map(h => `<span>${h}</span>`).join("")}</div>
+            <div>
+              ${rows.map((row, index) => `
+                <div class="row clickable" onclick="notify('Ouverture de la fiche n°' + ${index + 1})">
+                  ${row.map((cell, cellIndex) => `<span class="${cellIndex === 0 ? 'good' : ''}">${cell}</span>`).join("")}
+                </div>
+              `).join("")}
+              ${rows.length === 0 ? `<div style="padding:28px;text-align:center;color:var(--text-muted);">${emptyMessage}</div>` : ""}
+            </div>
+          </div>
+        </section>`;
+    }
+
+    function workflowNotice(title, text) {
+      return `
+        <div class="panel" style="border-left:3px solid var(--accent-gold);background:linear-gradient(90deg,rgba(210,181,125,.08),var(--bg-panel));">
+          <span class="eyebrow">FLUX INSTITUTIONNEL</span>
+          <h2 style="margin:6px 0 8px;font:400 18px Georgia,serif;">${title}</h2>
+          <p style="color:var(--text-muted);font-size:11px;line-height:1.7;">${text}</p>
+        </div>`;
+    }
+
+    function createSimpleRecord(type) {
+      const labels = {
+        patrol: "patrouille", patient: "dossier patient", weapon: "demande de port d'armes",
+        death: "déclaration de décès", document: "document officiel",
+        justice: "procédure judiciaire", prison: "dossier d'écrou", staff: "membre du personnel"
+      };
+      const definitions={
+        patrol:[["name","Indicatif","Écho 21"],["leader","Chef d'unité","Nom du responsable"],["members","Composition","2 agents"],["vehicle","Véhicule","Peugeot 5008"]],
+        patient:[["patient","Patient","Prénom Nom"],["citizenId","Identifiant citoyen","FR-01"],["blood","Groupe sanguin","O+"],["allergies","Allergies","Aucune connue"],["condition","État clinique","Stable"]],
+        weapon:[["citizen","Demandeur","Prénom Nom"],["citizenId","Identifiant citoyen","FR-01"],["medicalStatus","État du certificat","À fournir"],["policeStatus","Enquête administrative","Non demandée"]],
+        death:[["citizen","Personne décédée","Prénom Nom"],["date","Date du décès","JJ/MM/AAAA"],["doctor","Auteur du certificat","Dr Prénom Nom"],["cause","Volet médical confidentiel","Cause / obstacle médico-légal"]],
+        document:[["citizen","Citoyen","Prénom Nom"],["type","Type de document","Acte de naissance"],["number","Numéro","DOC-2026-001"]],
+        justice:[["citizen","Personne concernée","Prénom Nom"],["source","Dossier source","DOS-01"],["reason","Objet de la saisine","Qualification et faits"],["hearing","Audience","À programmer"]],
+        prison:[["citizen","Personne écrouée","Prénom Nom"],["caseId","Décision judiciaire","TRIB-001"],["sentence","Peine","12 mois"],["prison","Établissement","Centre pénitentiaire"]]
+      };
+      const fields=definitions[type]; if(!fields)return notify("Ce module nécessite un droit d'administration.");
+      const body=fields.map(([id,label,placeholder])=>`<div class="form-group"><label>${label}</label><input id="simple_${id}" class="field" required placeholder="${placeholder}"></div>`).join("")+`<button class="primary" type="submit" style="width:100%">Enregistrer dans Firestore</button>`;
+      openModal(`Créer : ${labels[type]}`,"L'enregistrement sera immédiatement partagé avec les utilisateurs habilités.","NOUVEL ENREGISTREMENT",body);
+      $("modalForm").onsubmit=e=>{e.preventDefault();const values={};fields.forEach(([id])=>values[id]=$("simple_"+id).value.trim());const n=Date.now().toString().slice(-6);
+        const targets={
+          patrol:["patrols",{id:"PAT-"+n,...values,service:activeService.code,status:"Disponible"}],
+          patient:["medicalRecords",{id:"PAT-"+values.citizenId,...values,updated:new Date().toLocaleDateString("fr-FR")}],
+          weapon:["weaponPermits",{id:"SIA-"+n,...values,status:"Instruction préfecture / SIA"}],
+          death:["deaths",{id:"DEC-"+n,...values,status:"À transmettre à l'état civil"}],
+          document:["civilDocuments",{id:"ETAT-"+n,...values,status:"Valide",issued:new Date().toLocaleDateString("fr-FR")}],
+          justice:["justiceCases",{id:"TRIB-"+n,...values,status:"Saisi par le parquet"}],
+          prison:["prisonTransfers",{id:"ECR-"+n,...values,status:"Écrou préparé"}]
+        };
+        const [key,item]=targets[type];db[key].unshift(item);setStore(key,db[key]);addAudit("Création",item.id,"Autorisé",labels[type]);modal.classList.add("hidden");notify("Enregistrement créé et synchronisé.");renderDynamicPage();
+      };
+    }
+
+    function addAudit(action, object, result, reason) {
+      const entry={
+        time:new Date().toLocaleTimeString("fr-FR"), actor:db.config.agentBadge,
+        service:activeService.code, action, object, result, reason, orgId:currentOrgId,
+        uid:currentFirebaseUser?.uid || null, createdAt:serverTimestamp()
+      };
+      db.audit.unshift(entry);
+      db.audit = db.audit.slice(0, 80);
+      localStorage.setItem("mdt_audit",JSON.stringify(db.audit));
+      if(remoteReady && currentOrgId) firestore.collection("organizations").doc(currentOrgId).collection("audit").add(entry).catch(handleFirebaseError);
+    }
+
+    function openEmergencyModal() {
+      const bodyHTML = `
+        <div class="form-group"><label>Numéro d'entrée</label><select id="callChannel" class="field"><option>15</option><option>17</option><option>18</option><option>112</option></select></div>
+        <div class="form-group"><label>Localisation vérifiée</label><input id="callLocation" class="field" required placeholder="Commune, voie, point kilométrique"></div>
+        <div class="form-group"><label>Nature synthétique</label><input id="callNature" class="field" required placeholder="Accident, agression, incendie, urgence médicale..."></div>
+        <div class="form-group"><label>Services à engager</label><input id="callServices" class="field" required value="${activeService.code}" placeholder="GN · SP · CH"></div>
+        <div class="form-group"><label>Synthèse partageable — minimum nécessaire</label><textarea id="callShared" class="field" required placeholder="Localisation, danger, nombre de victimes et éléments utiles à l'engagement"></textarea></div>
+        <button class="primary" type="submit" style="width:100%">Créer et tracer l'appel</button>`;
+      openModal("Prendre un appel d'urgence", "Qualifier, orienter et engager les moyens adaptés.", "CENTRE 15 · 17 · 18 · 112", bodyHTML);
+      $("modalForm").onsubmit = e => {
+        e.preventDefault();
+        const channel=$("callChannel").value;
+        const item={id:`APL-${channel}-${String(db.emergencyCalls.length+85).padStart(3,"0")}`,channel,received:new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}),location:$("callLocation").value.trim(),nature:$("callNature").value.trim(),priority:"P2",lead:activeService.code,engaged:$("callServices").value.trim(),status:"Coordination active",shared:$("callShared").value.trim()};
+        db.emergencyCalls.unshift(item); setStore("emergencyCalls",db.emergencyCalls); addAudit("Création appel",item.id,"Autorisé","Mission opérationnelle");
+        modal.classList.add("hidden"); notify("Appel qualifié et moyens alertés."); renderDynamicPage();
+      };
+    }
+
+    function openTransmissionModal() {
+      const targets = activeService.code === "GN" || activeService.code === "PN" ? ["PARQUET","SP","CH","PRÉFECTURE"] : activeService.code === "CH" ? ["SP","ÉTAT CIVIL","PARQUET"] : activeService.code === "SP" ? ["CH","GN","PN"] : ["GN","PN","CH","SP","TRIBUNAL","PRISON"];
+      const bodyHTML = `
+        <div class="form-group"><label>Destinataire habilité</label><select id="trsTarget" class="field">${targets.map(t=>`<option>${t}</option>`).join("")}</select></div>
+        <div class="form-group"><label>Type de transmission</label><select id="trsType" class="field"><option>Compte rendu opérationnel</option><option>Saisine judiciaire</option><option>Bilan secouriste</option><option>Volet administratif</option><option>Demande administrative</option></select></div>
+        <div class="form-group"><label>Objet</label><input id="trsSubject" class="field" required placeholder="Référence et objet précis"></div>
+        <div class="form-group"><label>Finalité / fondement métier</label><input id="trsLegal" class="field" required placeholder="Coordination, continuité des soins, procédure judiciaire..."></div>
+        <div class="form-group"><label>Informations strictement nécessaires</label><textarea id="trsPayload" class="field" required placeholder="Ne pas recopier le dossier complet"></textarea></div>
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:10px;color:var(--text-muted);margin:12px 0"><input id="trsConfirm" type="checkbox" required> Je confirme que le destinataire est habilité et que le contenu respecte le besoin d'en connaître.</label>
+        <button class="primary" type="submit" style="width:100%">Sceller et transmettre</button>`;
+      openModal("Nouvelle transmission", "Le dossier source reste dans votre service.", "ÉCHANGE INTERSERVICES", bodyHTML);
+      $("modalForm").onsubmit = e => {
+        e.preventDefault();
+        const item={id:`TRS-${new Date().getFullYear()}-${String(db.transmissions.length+45).padStart(3,"0")}`,date:new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"})+" · "+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}),from:activeService.code,to:$("trsTarget").value,type:$("trsType").value,subject:$("trsSubject").value.trim(),confidentiality:"Restreint",status:"Envoyé",payload:$("trsPayload").value.trim(),legal:$("trsLegal").value.trim()};item.participants=transmissionParticipants(item);
+        db.transmissions.unshift(item); setStore("transmissions",db.transmissions); addAudit("Transmission",item.id,"Scellée",item.legal);
+        modal.classList.add("hidden"); notify("Transmission scellée, horodatée et envoyée."); renderDynamicPage();
+      };
+    }
+
+    async function openCreateStaffModal() {
+      if(!["owner","admin","direction"].includes(currentUserProfile?.role)) return notify("Droit de direction requis.");
+      const bodyHTML=`
+        <div class="form-group"><label>Nom RP</label><input id="staffName" class="field" required></div>
+        <div class="form-group"><label>Matricule</label><input id="staffBadge" class="field" required placeholder="GND-0123"></div>
+        <div class="form-group"><label>Institution</label><select id="staffService" class="field">${db.services.filter(s=>s.enabled).map(s=>`<option value="${s.code}">${s.name}</option>`).join("")}</select></div>
+        <div class="form-group"><label>Rôle / habilitation</label><select id="staffRole" class="field"><option value="agent">Agent</option><option value="supervisor">Superviseur</option><option value="opj">OPJ</option><option value="dispatcher">Opérateur dispatch</option><option value="medic">Soignant</option><option value="doctor">Médecin</option><option value="magistrate">Magistrat</option><option value="greffe">Greffe</option><option value="direction">Direction</option><option value="admin">Administrateur</option></select></div>
+        <div class="form-group"><label>Adresse de connexion</label><input id="staffEmail" type="email" class="field" required></div>
+        <div class="form-group"><label>Mot de passe temporaire</label><input id="staffPassword" type="password" minlength="8" class="field" required></div>
+        <button class="primary" type="submit" style="width:100%">Créer et habiliter le compte</button>`;
+      openModal("Créer un compte agent","Le compte sera rattaché uniquement à votre organisation.","ADMINISTRATION DES ACCÈS",bodyHTML);
+      $("modalForm").onsubmit=async e=>{e.preventDefault();
+        try{
+          const secondaryName="staff-"+Date.now(), secondaryApp=firebase.initializeApp(firebaseConfig,secondaryName), secondaryAuth=secondaryApp.auth();
+          const cred=await secondaryAuth.createUserWithEmailAndPassword($("staffEmail").value.trim(),$("staffPassword").value);
+          const profile={uid:cred.user.uid,orgId:currentOrgId,name:$("staffName").value.trim(),badge:$("staffBadge").value.trim().toUpperCase(),service:$("staffService").value,role:$("staffRole").value,active:true,email:$("staffEmail").value.trim().toLowerCase(),createdAt:serverTimestamp(),createdBy:currentFirebaseUser.uid};
+          await firestore.collection("users").doc(cred.user.uid).set(profile);
+          const staff={id:profile.badge,uid:profile.uid,name:profile.name,service:profile.service,grade:roleLabel(profile.role),permissions:profile.role,status:"Actif",orgId:currentOrgId};
+          await firestore.collection("organizations").doc(currentOrgId).collection("staff").doc(profile.uid).set(staff);
+          await secondaryAuth.signOut(); await secondaryApp.delete();
+          addAudit("Création compte",profile.badge,"Autorisé","Administration du personnel"); modal.classList.add("hidden");notify("Compte créé et habilité.");
+        }catch(error){handleFirebaseError(error);}
+      };
+    }
+
+    // Gestionnaires de filtres
+    function setCitizensFilter(filter) {
+      citizensFilter = filter;
+      renderDynamicPage();
+    }
+    function setInterventionsFilter(filter) {
+      interventionsFilter = filter;
+      renderDynamicPage();
+    }
+    function setCasesFilter(filter) {
+      casesFilter = filter;
+      renderDynamicPage();
+    }
+
+    // Clôture d'intervention
+    function closeIntervention(id) {
+      const i = db.interventions.find(x => x.id === id);
+      if (i) {
+        i.status = "Traité";
+        i.priority = "Traité";
+        i.badgeClass = "done";
+        setStore("interventions", db.interventions);
+        notify("Intervention clôturée et archivée.");
+        renderDynamicPage();
+      }
+    }
+
+    // Archivage de dossier criminel
+    function archiveCase(id) {
+      const c = db.cases.find(x => x.id === id);
+      if (c) {
+        c.status = "Archivé";
+        setStore("cases", db.cases);
+        notify("Dossier d'enquête archivé.");
+        renderDynamicPage();
+      }
+    }
+
+    // ==========================================
+    // DIALOGUES ET MODALS SECURISEES POUR L'ETAPE 4, 5 & 6
+    // ==========================================
+
+    const modal = $("modal");
+    const modalBody = $("modalBody");
+    const modalTitle = $("modalTitle");
+    const modalSubtitle = $("modalSubtitle");
+    const modalEyebrow = $("modalEyebrow");
+
+    function openModal(title, subtitle, eyebrow, bodyHTML) {
+      modalTitle.textContent = title;
+      modalSubtitle.textContent = subtitle;
+      modalEyebrow.textContent = eyebrow;
+      modalBody.innerHTML = bodyHTML;
+      modal.classList.remove("hidden");
+    }
+
+    $("closeModal").onclick = () => {
+      modal.classList.add("hidden");
+    };
+
+    // --- ENREGISTRER CITOYEN ---
+    function openCreateCitizenModal() {
+      const form = `
+        <div class="form-group">
+          <label>Identifiant unique (Format: FR-XX)</label>
+          <input type="text" id="newCitId" class="field" value="FR-${String(db.citizens.length + 1).padStart(2, '0')}" required>
+        </div>
+        <div class="form-group">
+          <label>Nom de famille</label>
+          <input type="text" id="newCitLastname" class="field" placeholder="Ex: Martin" required>
+        </div>
+        <div class="form-group">
+          <label>Prénom</label>
+          <input type="text" id="newCitFirstname" class="field" placeholder="Ex: Lucas" required>
+        </div>
+        <div class="form-group">
+          <label>Date de Naissance</label>
+          <input type="text" id="newCitBirth" class="field" placeholder="Ex: 12/04/1995" required>
+        </div>
+        <div class="form-group">
+          <label>Numéro de téléphone</label>
+          <input type="text" id="newCitPhone" class="field" placeholder="Ex: 555-1234">
+        </div>
+        <button class="primary" type="submit" style="width:100%; margin-top:10px;">Valider l'enregistrement</button>
+      `;
+
+      openModal("Enregistrer un citoyen", "Inscrire un nouveau citoyen dans la base civile.", "DOSSIER CIVIL", form);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        const newCit = {
+          id: $("newCitId").value.trim().toUpperCase(),
+          lastname: $("newCitLastname").value.trim(),
+          firstname: $("newCitFirstname").value.trim(),
+          birthdate: $("newCitBirth").value.trim(),
+          phone: $("newCitPhone").value.trim() || "Non renseigné",
+          driverLicense: "Valide",
+          wanted: false,
+          notes: "Nouvel arrivant.",
+          records: []
+        };
+
+        db.citizens.push(newCit);
+        setStore("citizens", db.citizens);
+        modal.classList.add("hidden");
+        notify(`Citoyen enregistré : ${newCit.firstname} ${newCit.lastname}`);
+        renderDynamicPage();
+      };
+    }
+
+    // --- ENREGISTRER VEHICULE ---
+    function openCreateVehicleModal() {
+      const ownersSelect = db.citizens.map(c => `<option value="${c.id}">${c.lastname.toUpperCase()} ${c.firstname}</option>`).join("");
+
+      const form = `
+        <div class="form-group">
+          <label>Plaque d'immatriculation (Format: XX-XXX-XX)</label>
+          <input type="text" id="newVehPlate" class="field" placeholder="Ex: AA-123-BB" required style="font-family:monospace; text-transform:uppercase;">
+        </div>
+        <div class="form-group">
+          <label>Modèle de véhicule</label>
+          <input type="text" id="newVehModel" class="field" placeholder="Ex: Sultan Classic" required>
+        </div>
+        <div class="form-group">
+          <label>Couleur</label>
+          <input type="text" id="newVehColor" class="field" placeholder="Ex: Noire" required>
+        </div>
+        <div class="form-group">
+          <label>Propriétaire du véhicule</label>
+          <select id="newVehOwner" class="field">${ownersSelect}</select>
+        </div>
+        <button class="primary" type="submit" style="width:100%; margin-top:10px;">Valider l'immatriculation</button>
+      `;
+
+      openModal("Immatriculer un véhicule", "Enregistrement d'une nouvelle carte grise.", "REGISTRE SÉCURISÉ", form);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        const ownerId = $("newVehOwner").value;
+        const owner = db.citizens.find(c => c.id === ownerId);
+
+        const newVeh = {
+          plate: $("newVehPlate").value.trim().toUpperCase(),
+          model: $("newVehModel").value.trim(),
+          color: $("newVehColor").value.trim(),
+          owner: `${owner.lastname} ${owner.firstname}`,
+          ownerId: owner.id,
+          wanted: false,
+          reason: "",
+          notes: "Aucune remarque."
+        };
+
+        db.vehicles.push(newVeh);
+        setStore("vehicles", db.vehicles);
+        modal.classList.add("hidden");
+        notify(`Véhicule immatriculé : ${newVeh.plate}`);
+        renderDynamicPage();
+      };
+    }
+
+    // --- DETAILS CITOYEN ---
+    function viewCitizenDetails(id) {
+      const c = db.citizens.find(x => x.id === id);
+      if (!c) return;
+
+      const userVehicles = db.vehicles.filter(v => v.ownerId === c.id);
+
+      const html = `
+        <div class="detail-grid">
+          <div class="detail-block">
+            <h3>Informations Générales</h3>
+            <div class="detail-item"><span>Identifiant</span><span>${c.id}</span></div>
+            <div class="detail-item"><span>Nom Complet</span><span>${c.lastname.toUpperCase()} ${c.firstname}</span></div>
+            <div class="detail-item"><span>Date de naissance</span><span>${c.birthdate}</span></div>
+            <div class="detail-item"><span>Téléphone</span><span>${c.phone || "Inconnu"}</span></div>
+          </div>
+
+          <div class="detail-block">
+            <h3>Droits & Titres</h3>
+            <div class="form-group">
+              <label>Permis de conduire</label>
+              <select id="editCitLicense" class="field" style="padding:8px;">
+                <option value="Valide" ${c.driverLicense === "Valide" ? "selected" : ""}>Valide</option>
+                <option value="Suspendu" ${c.driverLicense === "Suspendu" ? "selected" : ""}>Suspendu</option>
+                <option value="Annulé" ${c.driverLicense === "Annulé" ? "selected" : ""}>Annulé</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-top:10px;">
+              <label><input type="checkbox" id="editCitWanted" ${c.wanted ? "checked" : ""}> Recherché activement</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-grid" style="grid-template-columns:1fr;">
+          <div class="detail-block">
+            <h3>Remarques de patrouille</h3>
+            <textarea id="editCitNotes" class="field" style="min-height:70px; resize:vertical;">${c.notes || ""}</textarea>
+          </div>
+        </div>
+
+        <div class="detail-grid" style="grid-template-columns:1fr;">
+          <div class="detail-block">
+            <h3>Véhicules possédés (${userVehicles.length})</h3>
+            ${userVehicles.map(v => `
+              <div class="detail-item" style="border-bottom:1px solid rgba(255,255,255,0.02); padding-bottom:5px;">
+                <span style="font-family:monospace; font-weight:bold; color:var(--accent-gold);">${v.plate}</span>
+                <span>${v.model} (${v.color}) ${v.wanted ? '<b style="color:var(--status-danger);">[RECHERCHÉ]</b>' : ''}</span>
+              </div>
+            `).join("")}
+            ${userVehicles.length === 0 ? '<div style="color:var(--text-muted); font-size:11px;">Aucun véhicule enregistré.</div>' : ''}
+          </div>
+        </div>
+
+        <div class="detail-grid" style="grid-template-columns:1fr;">
+          <div class="detail-block">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <h3 style="margin-bottom:0;">Casier Judiciaire</h3>
+              <button type="button" class="primary" style="font-size:8px; padding:4px 8px;" onclick="openAddViolationModal('${c.id}')">＋ Ajouter infraction</button>
+            </div>
+            <div style="max-height:200px; overflow-y:auto; padding-right:5px;">
+              ${c.records.map(r => `
+                <div class="record-card">
+                  <strong>${r.title} — ${r.type}</strong>
+                  <p style="color:var(--text-muted); font-size:10px; margin-bottom:4px;">${r.desc || "Sans description."}</p>
+                  <small style="color:var(--accent-gold); font-size:8px;">Date : ${r.date}</small>
+                </div>
+              `).join("")}
+              ${c.records.length === 0 ? '<div style="color:var(--text-muted); font-size:11px; text-align:center;">Casier vierge.</div>' : ''}
+            </div>
+          </div>
+        </div>
+
+        <button class="primary" type="submit" style="width:100%; margin-top:15px;">Sauvegarder la fiche civile</button>
+      `;
+
+      openModal(`Dossier Civil : ${c.firstname} ${c.lastname.toUpperCase()}`, "Consulter et modifier l'état ou les notes du citoyen.", "CENTRE DE DONNÉES", html);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        c.driverLicense = $("editCitLicense").value;
+        c.wanted = $("editCitWanted").checked;
+        c.notes = $("editCitNotes").value.trim();
+
+        setStore("citizens", db.citizens);
+        modal.classList.add("hidden");
+        notify("Fiche civile enregistrée.");
+        renderDynamicPage();
+      };
+    }
+
+    // --- INFRACTION DIRECTE ---
+    function openAddViolationModal(citId) {
+      const c = db.citizens.find(x => x.id === citId);
+      if (!c) return;
+
+      const bodyHTML = `
+        <div class="form-group">
+          <label>Libellé de l'infraction</label>
+          <input type="text" id="violTitle" class="field" placeholder="Ex: Excès de vitesse majeur (>50km/h)" required>
+        </div>
+        <div class="form-group">
+          <label>Type de délit</label>
+          <select id="violType" class="field">
+            <option>Contravention</option>
+            <option>Délit</option>
+            <option>Crime</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description des faits</label>
+          <textarea id="violDesc" class="field" style="min-height:60px;" placeholder="Ex: Flashé à 160km/h au lieu de 90km/h..."></textarea>
+        </div>
+        <button class="primary" type="submit" style="width:100%; margin-top:10px;">Inscrire au casier</button>
+      `;
+
+      openModal("Ajouter une infraction", `Sanctionner ${c.firstname} ${c.lastname.toUpperCase()}`, "DÉCISION JUDICIAIRE", bodyHTML);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        const record = {
+          date: new Date().toLocaleDateString("fr-FR"),
+          title: $("violTitle").value.trim(),
+          type: $("violType").value,
+          desc: $("violDesc").value.trim()
+        };
+
+        c.records.unshift(record);
+        setStore("citizens", db.citizens);
+
+        // Réouvrir la fiche civile actualisée
+        viewCitizenDetails(citId);
+        notify("Infraction ajoutée au casier.");
+      };
+    }
+
+    // --- DETAILS VEHICULE ---
+    function viewVehicleDetails(plate) {
+      const v = db.vehicles.find(x => x.plate === plate);
+      if (!v) return;
+
+      const html = `
+        <div style="background:var(--bg-panel2); padding:15px; border-radius:7px; border:1px solid var(--line); text-align:center; margin-bottom:15px;">
+          <h1 style="font-family:monospace; font-size:24px; color:var(--accent-gold); letter-spacing:1.5px;">${v.plate}</h1>
+          <p style="font-size:10px; color:var(--text-muted); margin-top:4px;">${v.model.toUpperCase()} • ${v.color.toUpperCase()}</p>
+        </div>
+
+        <div class="detail-block">
+          <h3>Propriétaire Référencé</h3>
+          <div class="detail-item">
+            <span>Nom</span>
+            <span class="clickable" style="text-decoration:underline; color:var(--accent-blue);" onclick="viewCitizenDetails('${v.ownerId}')">${v.owner}</span>
+          </div>
+        </div>
+
+        <div class="detail-block" style="margin-top:15px;">
+          <h3>Signalement & Remarques</h3>
+          <div class="form-group">
+            <label><input type="checkbox" id="editVehWanted" ${v.wanted ? "checked" : ""}> Signaler ce véhicule</label>
+          </div>
+          <div class="form-group" id="vehReasonGroup" style="margin-top:10px;" class="${v.wanted ? "" : "hidden"}">
+            <label>Motif de recherche active</label>
+            <input type="text" id="editVehReason" class="field" placeholder="Ex: Volé devant l'hôpital..." value="${v.reason || ""}">
+          </div>
+          <div class="form-group" style="margin-top:10px;">
+            <label>Notes complémentaires</label>
+            <textarea id="editVehNotes" class="field" style="min-height:60px;">${v.notes || ""}</textarea>
+          </div>
+        </div>
+
+        <button class="primary" type="submit" style="width:100%; margin-top:15px;">Enregistrer la fiche véhicule</button>
+      `;
+
+      openModal("Fiche Véhicule", `Immatriculation ${v.plate}`, "CENTRE DE DONNÉES", html);
+
+      $("editVehWanted").onchange = (e) => {
+        $("vehReasonGroup").classList.toggle("hidden", !e.target.checked);
+      };
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        v.wanted = $("editVehWanted").checked;
+        v.reason = v.wanted ? $("editVehReason").value.trim() : "";
+        v.notes = $("editVehNotes").value.trim();
+
+        setStore("vehicles", db.vehicles);
+        modal.classList.add("hidden");
+        notify("Fiche véhicule enregistrée.");
+        renderDynamicPage();
+      };
+    }
+
+    // --- DETAILS RAPPORTS ---
+    function viewReportDetails(id) {
+      const r = db.reports.find(x => x.id === id);
+      if (!r) return;
+
+      const html = `
+        <div class="detail-block">
+          <h3>Membres de l'intervention</h3>
+          <div class="detail-item"><span>Rédacteur</span><span>${r.author}</span></div>
+          <div class="detail-item"><span>Citoyen concerné</span><span>${r.citizenName}</span></div>
+          <div class="detail-item"><span>Date</span><span>${r.date}</span></div>
+        </div>
+
+        <div class="detail-block" style="margin-top:15px;">
+          <h3>Compte rendu des faits</h3>
+          <p style="font-size:12px; line-height:1.6; white-space:pre-wrap; color:var(--text-main);">${r.content}</p>
+        </div>
+
+        <button class="primary" type="button" style="width:100%; margin-top:15px;" onclick="modal.classList.add('hidden')">Fermer la lecture</button>
+      `;
+
+      openModal(r.title, "Rapport d'enquête numérisé.", "CONSIGNATION DE PROCÉDURE", html);
+    }
+
+    // --- FORMULAIRE CRÉATION INTERVENTION ---
+    function openCreateInterventionModal() {
+      const bodyHTML = `
+        <div class="form-group">
+          <label>Titre de l'appel</label>
+          <input type="text" id="newIntTitle" class="field" placeholder="Ex: Tapage nocturne Place République" required>
+        </div>
+        <div class="form-group">
+          <label>Niveau de priorité</label>
+          <select id="newIntPriority" class="field">
+            <option value="Urgent">Urgent</option>
+            <option value="Prioritaire">Prioritaire</option>
+            <option value="Normal">Normal</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description du signalement</label>
+          <textarea id="newIntDesc" class="field" style="min-height:80px;" placeholder="Détails transmis par la centrale de dispatch..." required></textarea>
+        </div>
+        <button class="primary" type="submit" style="width:100%; margin-top:10px;">Lancer l'intervention</button>
+      `;
+
+      openModal("Créer une intervention", "Déployer des patrouilles sur un appel réseau.", "DISPATCH CENTRE", bodyHTML);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        const p = $("newIntPriority").value;
+        const badgeClass = p === "Urgent" ? "urgent" : (p === "Prioritaire" ? "priority" : "");
+
+        const newInt = {
+          id: "INT-" + String(db.interventions.length + 1).padStart(3, '0'),
+          time: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+          service: activeService.code,
+          title: $("newIntTitle").value.trim(),
+          status: "En cours",
+          priority: p,
+          badgeClass: badgeClass,
+          desc: $("newIntDesc").value.trim()
+        };
+
+        db.interventions.unshift(newInt);
+        setStore("interventions", db.interventions);
+        modal.classList.add("hidden");
+        notify("Appel d'urgence dispatché aux patrouilles !");
+        renderDynamicPage();
+      };
+    }
+
+    // --- FORMULAIRE DÉPOSITION RAPPORT ---
+    function openCreateReportModal() {
+      const citizensOptions = db.citizens.map(c => `<option value="${c.id}">${c.lastname.toUpperCase()} ${c.firstname}</option>`).join("");
+
+      const bodyHTML = `
+        <div class="form-group">
+          <label>Titre officiel du rapport</label>
+          <input type="text" id="newRepTitle" class="field" placeholder="Ex: Rapport d'infraction routière" required>
+        </div>
+        <div class="form-group">
+          <label>Citoyen impliqué</label>
+          <select id="newRepCitizen" class="field">${citizensOptions}</select>
+        </div>
+        <div class="form-group">
+          <label>Contenu et procès verbal</label>
+          <textarea id="newRepContent" class="field" style="min-height:120px;" placeholder="Rédiger votre rapport détaillé ici..." required></textarea>
+        </div>
+        <button class="primary" type="submit" style="width:100%; margin-top:10px;">Consigner le rapport</button>
+      `;
+
+      openModal("Déposer un rapport officiel", "Enregistrer un compte rendu d'intervention.", "PROCÉDURE OPÉRATIONNELLE", bodyHTML);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        const citId = $("newRepCitizen").value;
+        const cit = db.citizens.find(c => c.id === citId);
+
+        const newRep = {
+          id: "REP-" + String(db.reports.length + 1).padStart(2, '0'),
+          title: $("newRepTitle").value.trim(),
+          date: new Date().toLocaleDateString("fr-FR"),
+          citizenId: cit.id,
+          citizenName: `${cit.lastname} ${cit.firstname}`,
+          author: db.config.agentName,
+          service: activeService.code,
+          content: $("newRepContent").value.trim()
+        };
+
+        db.reports.unshift(newRep);
+        setStore("reports", db.reports);
+        modal.classList.add("hidden");
+        notify("Rapport officiellement enregistré dans le registre national !");
+        renderDynamicPage();
+      };
+    }
+
+    // --- FORMULAIRE CRÉATION ENQUÊTE (DOSSIER) ---
+    function openCreateCaseModal() {
+      const citizensOptions = db.citizens.map(c => `<option value="${c.id}">${c.lastname.toUpperCase()} ${c.firstname}</option>`).join("");
+
+      const bodyHTML = `
+        <div class="form-group">
+          <label>Nom de l'enquête judiciaire</label>
+          <input type="text" id="newCaseTitle" class="field" placeholder="Ex: Braquages supérettes Blaine County" required>
+        </div>
+        <div class="form-group">
+          <label>Suspect principal identifié</label>
+          <select id="newCaseCitizen" class="field">${citizensOptions}</select>
+        </div>
+        <div class="form-group">
+          <label>Description / Résumé des charges</label>
+          <textarea id="newCaseDesc" class="field" style="min-height:80px;" placeholder="Éléments d'enquête en votre possession..." required></textarea>
+        </div>
+        <button class="primary" type="submit" style="width:100%; margin-top:10px;">Ouvrir l'instruction</button>
+      `;
+
+      openModal("Ouvrir une enquête criminelle", "Ajouter un dossier d'instruction criminel.", "INSTRUCTION JUDICIAIRE", bodyHTML);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        const citId = $("newCaseCitizen").value;
+        const cit = db.citizens.find(c => c.id === citId);
+
+        const newCase = {
+          id: "DOS-" + String(db.cases.length + 1).padStart(2, '0'),
+          title: $("newCaseTitle").value.trim(),
+          status: "Actif",
+          desc: $("newCaseDesc").value.trim(),
+          citizenId: cit.id,
+          citizenName: `${cit.lastname} ${cit.firstname}`,
+          service: activeService.code
+        };
+
+        db.cases.unshift(newCase);
+        setStore("cases", db.cases);
+        modal.classList.add("hidden");
+        notify("Dossier d'instruction ouvert !");
+        renderDynamicPage();
+      };
+    }
+
+    // ==========================================
+    // ETAPE 6 : RECHERCHE GLOBALE ET MODAL CONFIGURATION ADMINISTRATIVE
+    // ==========================================
+
+    const configBtn = $("configBtn");
+
+    // Ouvrir la modal d'administration
+    configBtn.onclick = () => {
+      const servicesChecks = db.services.map(s => `
+        <label>
+          <input type="checkbox" class="srv-check" data-code="${s.code}" ${s.enabled ? "checked" : ""}>
+          <i style="background:${s.color};">${s.icon}</i>
+          ${s.name}
+        </label>
+      `).join("");
+
+      const bodyHTML = `
+        <div class="form-group">
+          <label>Nom de l'organisation d'État</label>
+          <input type="text" id="adminOrgName" class="field" value="${db.config.orgName}" required>
+        </div>
+        <div class="form-group">
+          <label>Nom d'affichage de l'agent actif</label>
+          <input type="text" id="adminAgentName" class="field" value="${db.config.agentName}" required>
+        </div>
+        <div class="form-group">
+          <label>Services habilités sur le terminal</label>
+          <div class="check-list">
+            ${servicesChecks}
+          </div>
+        </div>
+        <button class="primary" type="submit" style="width:100%; margin-top:15px;">Enregistrer la configuration</button>
+      `;
+
+      openModal("Configurer votre MDT", "Ajuster l'identité nationale du terminal opérationnel.", "ADMINISTRATION SYSTEME", bodyHTML);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+
+        // Sauvegarde de l'organisation
+        db.config.orgName = $("adminOrgName").value.trim();
+        db.config.agentName = $("adminAgentName").value.trim();
+        setStore("config", db.config);
+
+        // Sauvegarde de l'état des services
+        document.querySelectorAll(".srv-check").forEach(cb => {
+          const s = db.services.find(x => x.code === cb.dataset.code);
+          if (s) s.enabled = cb.checked;
+        });
+        setStore("services", db.services);
+
+        // Actualisation directe
+        $("orgSmall").textContent = db.config.orgName;
+        $("agentNameDisplay").textContent = db.config.agentName;
+        $("agentAvatar").textContent = db.config.agentName.trim().split(/\s+/).filter(Boolean).map(n => n[0]).join("").toUpperCase().slice(0,2);
+
+        buildServices();
+        selectService(activeService.code);
+
+        modal.classList.add("hidden");
+        notify("Configuration enregistrée et appliquée.");
+        renderDynamicPage();
+      };
+    };
+
+    // --- RECHERCHE GLOBALE POPUP (CTRL K / RECHERCHE MULTI-MODULE) ---
+    const searchOverlay = $("globalSearchOverlay");
+    const globalSearchInput = $("globalSearchInput");
+    const globalSearchResults = $("globalSearchResults");
+
+    // Écoute de l'événement CTRL K
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        searchOverlay.classList.remove("hidden");
+        globalSearchInput.focus();
+        triggerGlobalSearch();
+      }
+      if (e.key === "Escape") {
+        searchOverlay.classList.add("hidden");
+      }
+    });
+
+    // Également branché sur la barre de recherche rapide haut de page
+    $("search").onfocus = (e) => {
+      e.preventDefault();
+      searchOverlay.classList.remove("hidden");
+      globalSearchInput.focus();
+      triggerGlobalSearch();
+    };
+
+    globalSearchInput.oninput = () => {
+      triggerGlobalSearch();
+    };
+
+    function triggerGlobalSearch() {
+      const q = globalSearchInput.value.toLowerCase().trim();
+
+      const matchedCitizens = db.citizens.filter(c => `${c.firstname} ${c.lastname} ${c.id}`.toLowerCase().includes(q));
+      const matchedVehicles = db.vehicles.filter(v => `${v.plate} ${v.model} ${v.owner}`.toLowerCase().includes(q));
+      const matchedReports = db.reports.filter(r => `${r.title} ${r.citizenName} ${r.author}`.toLowerCase().includes(q));
+
+      let html = "";
+
+      if (matchedCitizens.length > 0) {
+        html += `<div class="result-group-title">Citoyens (${matchedCitizens.length})</div>`;
+        html += matchedCitizens.map(c => `
+          <div class="result-item" onclick="openGlobalSearchResult('citizen', '${c.id}')">
+            <div class="result-item-info">
+              <strong>${c.lastname.toUpperCase()} ${c.firstname}</strong>
+              <small>ID Civil: ${c.id} • Tel: ${c.phone || "Aucun"}</small>
+            </div>
+            ${c.wanted ? '<span class="badge urgent">Recherché</span>' : '<span class="badge">R.A.S.</span>'}
+          </div>
+        `).join("");
+      }
+
+      if (matchedVehicles.length > 0) {
+        html += `<div class="result-group-title">Véhicules (${matchedVehicles.length})</div>`;
+        html += matchedVehicles.map(v => `
+          <div class="result-item" onclick="openGlobalSearchResult('vehicle', '${v.plate}')">
+            <div class="result-item-info">
+              <strong>${v.model} — <span style="font-family:monospace; color:var(--accent-gold);">${v.plate}</span></strong>
+              <small>Propriétaire: ${v.owner} • Couleur: ${v.color}</small>
+            </div>
+            ${v.wanted ? '<span class="badge urgent">Signalé Volé</span>' : '<span class="badge done">En règle</span>'}
+          </div>
+        `).join("");
+      }
+
+      if (matchedReports.length > 0) {
+        html += `<div class="result-group-title">Rapports d'interventions (${matchedReports.length})</div>`;
+        html += matchedReports.map(r => `
+          <div class="result-item" onclick="openGlobalSearchResult('report', '${r.id}')">
+            <div class="result-item-info">
+              <strong>${r.title}</strong>
+              <small>Rédacteur: ${r.author} • Date: ${r.date}</small>
+            </div>
+            <span class="badge">Numérisé</span>
+          </div>
+        `).join("");
+      }
+
+      if (html === "") {
+        html = `<div style="padding:30px; text-align:center; color:var(--text-muted); font-size:11px;">Aucun citoyen, véhicule ou rapport ne correspond à votre saisie.</div>`;
+      }
+
+      globalSearchResults.innerHTML = html;
+    }
+
+    // Ouvrir un résultat depuis l'overlay global
+    function openGlobalSearchResult(type, id) {
+      searchOverlay.classList.add("hidden");
+      if (type === "citizen") {
+        navigateToPage("Citoyens");
+        viewCitizenDetails(id);
+      } else if (type === "vehicle") {
+        navigateToPage("Véhicules");
+        viewVehicleDetails(id);
+      } else if (type === "report") {
+        navigateToPage("Rapports");
+        viewReportDetails(id);
+      }
+    }
+  </script>
+</body>
+</html>

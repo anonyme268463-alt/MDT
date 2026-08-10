@@ -1,0 +1,2592 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MDT-GTA-RP — Système Opérationnel National</title>
+  <meta name="description" content="Système d'Information Opérationnel Français pour Services Publics - GTA RP MDT">
+  <style>
+    /* ==========================================
+       VARIABLES DE THEME ET PALETTE PREMIUM
+       ========================================== */
+    :root {
+      --bg-dark: #07131f;
+      --bg-side: #091827;
+      --bg-panel: #0d2033;
+      --bg-panel2: #10263d;
+      --line: #1d354d;
+      --text-main: #ecf2f8;
+      --text-muted: #788ba2;
+
+      --accent-gold: #d2b57d;
+      --accent-gold-hover: #e5cb9a;
+      --accent-blue: #6389e5;
+      --accent-blue-hover: #80a1f0;
+
+      --status-success: #4bc9a1;
+      --status-warning: #f59e0b;
+      --status-danger: #ec6a65;
+
+      --font-family: Arial, sans-serif;
+      --transition-speed: 0.2s;
+    }
+
+    /* Reset global et scrollbars */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--line);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-blue);
+    }
+
+    /* Raccourcis utilitaires */
+    .hidden {
+      display: none !important;
+    }
+
+    /* ==========================================
+       ECRAN DE CONNEXION (LOGIN)
+       ========================================== */
+    .login-container {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 46% 54%;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-left {
+      padding: 45px clamp(45px, 7vw, 105px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: linear-gradient(135deg, #0d1e33, var(--bg-dark));
+      border-right: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .seal {
+      width: 43px;
+      height: 43px;
+      border: 1px solid #aebfd3;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: Georgia, serif;
+      font-size: 12px;
+      box-shadow: inset 0 0 0 4px var(--bg-dark), inset 0 0 0 5px #415772;
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 14px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .brand small {
+      display: block;
+      margin-top: 5px;
+      color: #6e8098;
+      font-size: 8px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .login-box {
+      margin: auto 0;
+      max-width: 440px;
+    }
+
+    .eyebrow {
+      color: var(--accent-gold);
+      font-size: 9px;
+      letter-spacing: .2em;
+      font-weight: bold;
+      text-transform: uppercase;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .login-box h1 {
+      font: 400 38px Georgia, serif;
+      margin: 14px 0 8px;
+      color: #fff;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      color: #a5b4c5;
+      font-size: 10px;
+      font-weight: bold;
+      letter-spacing: .05em;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+    }
+
+    .field {
+      width: 100%;
+      border: 1px solid #263d55;
+      border-radius: 7px;
+      background: #0d1f32;
+      color: white;
+      padding: 14px;
+      outline: none;
+      font-size: 13px;
+      transition: border-color var(--transition-speed);
+    }
+
+    .field:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .primary {
+      border: 0;
+      border-radius: 7px;
+      background: linear-gradient(135deg, #e2cb9e, #bd9561);
+      color: #172235;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 14px 18px;
+      cursor: pointer;
+      transition: opacity var(--transition-speed), transform var(--transition-speed);
+    }
+
+    .primary:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .login-box .primary {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .demo {
+      text-align: center;
+      color: #52667e;
+      font-size: 8px;
+      margin-top: 12px;
+    }
+
+    .login-foot {
+      display: flex;
+      justify-content: space-between;
+      color: #4f637a;
+      font-size: 8px;
+    }
+
+    .online {
+      color: var(--status-success);
+    }
+
+    /* Panneau d'ambiance à droite */
+    .login-art {
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 42%, #173b60, #0b2035 40%, #06101c 74%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 55px;
+    }
+
+    .login-art:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(30deg, transparent 49.8%, #35618a12 50%, transparent 50.2%);
+      background-size: 140px 140px;
+    }
+
+    .flag {
+      position: absolute;
+      right: 55px;
+      top: 48px;
+      width: 72px;
+      height: 3px;
+      background: linear-gradient(90deg, #4777d1 33%, #eee 33% 66%, #dc5d5d 66%);
+    }
+
+    .hero {
+      max-width: 520px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero > span {
+      color: #7890aa;
+      font-size: 9px;
+      letter-spacing: .24em;
+    }
+
+    .hero h2 {
+      font: 400 61px/1 Georgia, serif;
+      margin: 22px 0;
+      color: #fff;
+    }
+
+    .hero h2 em {
+      font-style: normal;
+      color: var(--accent-gold);
+    }
+
+    .hero p {
+      color: #8294a9;
+      line-height: 1.7;
+      max-width: 420px;
+      font-size: 13px;
+    }
+
+    .services {
+      display: flex;
+      gap: 11px;
+      margin-top: 38px;
+    }
+
+    .service-logo {
+      width: 61px;
+      height: 68px;
+      border: 1px solid #203850;
+      border-radius: 7px;
+      background: #0b1b2d;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .service-logo b {
+      font-size: 20px;
+    }
+
+    .service-logo small {
+      font-size: 7px;
+      color: #768aa1;
+      font-weight: bold;
+    }
+
+    /* ==========================================
+       DASHBOARD APPLICATIF (MDT CORPS)
+       ========================================== */
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 250px 1fr;
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: 250px;
+      padding: 24px 17px;
+      background: var(--bg-side);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    .sidebar .brand {
+      padding: 0 8px 23px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .service-switch {
+      margin: 19px 0;
+      padding: 10px;
+      border: 1px solid #20394f;
+      border-radius: 8px;
+      background: var(--bg-panel);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      position: relative;
+    }
+
+    .service-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      background: var(--accent-blue);
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .service-switch small {
+      font-size: 7px;
+      color: #667a92;
+      letter-spacing: .12em;
+      display: block;
+      text-transform: uppercase;
+    }
+
+    .service-switch strong {
+      font-size: 10px;
+      color: #fff;
+    }
+
+    .service-switch select {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .nav button, .config {
+      height: 42px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: #7d90a6;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 12px;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      text-align: left;
+      transition: background var(--transition-speed), color var(--transition-speed);
+      width: 100%;
+    }
+
+    .nav button:hover, .config:hover {
+      background: var(--bg-panel2);
+      color: #fff;
+    }
+
+    .nav button.active {
+      background: linear-gradient(90deg, #1b3758, #112941);
+      color: #eef4fb;
+      border-left: 3px solid var(--accent-gold);
+    }
+
+    .nav button span, .config span {
+      width: 18px;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    .nav b {
+      margin-left: auto;
+      padding: 2px 6px;
+      border-radius: 9px;
+      background: var(--status-danger);
+      color: #fff;
+      font-size: 7px;
+    }
+
+    .side-bottom {
+      margin-top: auto;
+      padding-top: 15px;
+      border-top: 1px solid var(--line);
+    }
+
+    .config {
+      width: 100%;
+      border-radius: 6px;
+      margin-bottom: 15px;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #263e59;
+      display: grid;
+      place-items: center;
+      font-size: 9px;
+      font-weight: bold;
+    }
+
+    .profile p {
+      flex: 1;
+      margin: 0;
+      min-width: 0;
+    }
+
+    .profile strong, .profile small {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .profile strong {
+      font-size: 9px;
+      color: #fff;
+    }
+
+    .profile small {
+      font-size: 7px;
+      color: #667a92;
+      margin-top: 4px;
+    }
+
+    .logout {
+      background: none;
+      border: 0;
+      color: #71859b;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 5px;
+      transition: color var(--transition-speed);
+    }
+
+    .logout:hover {
+      color: var(--status-danger);
+    }
+
+    /* Main Area */
+    .main {
+      grid-column: 2;
+      min-width: 0;
+    }
+
+    .topbar {
+      height: 70px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      background: #081624ee;
+      z-index: 9;
+      backdrop-filter: blur(5px);
+    }
+
+    .search {
+      width: min(520px, 49vw);
+      height: 37px;
+      border: 1px solid #1e364e;
+      border-radius: 7px;
+      background: #0c1d2f;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      color: #60758d;
+    }
+
+    .search input {
+      flex: 1;
+      background: none;
+      border: 0;
+      outline: 0;
+      color: white;
+      font-size: 11px;
+      margin-left: 9px;
+    }
+
+    .search kbd {
+      font-size: 7px;
+      border: 1px solid #29435d;
+      border-radius: 4px;
+      padding: 3px 5px;
+      font-family: monospace;
+    }
+
+    .right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .status {
+      border: 1px solid #223b53;
+      background: #10263a;
+      border-radius: 6px;
+      color: var(--status-success);
+      padding: 9px 12px;
+      font-size: 8px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .clock {
+      font-size: 9px;
+      text-align: right;
+    }
+
+    .clock small {
+      display: block;
+      color: #647991;
+      font-size: 7px;
+      text-transform: uppercase;
+    }
+
+    .clock strong {
+      color: #fff;
+    }
+
+    .content {
+      padding: 32px;
+      max-width: 1500px;
+      margin: auto;
+    }
+
+    .heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 28px;
+    }
+
+    .heading h1 {
+      font: 400 31px Georgia, serif;
+      margin: 7px 0;
+      color: #fff;
+    }
+
+    .heading p {
+      margin: 0;
+      color: #71849a;
+      font-size: 11px;
+    }
+
+    /* Cartes stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 13px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      min-height: 113px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: linear-gradient(145deg, #10263d, #0b1d2f);
+      padding: 17px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color var(--transition-speed);
+    }
+
+    .stat:hover {
+      border-color: var(--accent-blue);
+    }
+
+    .stat span, .stat small {
+      display: block;
+      color: #778ba2;
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat strong {
+      font: 400 29px Georgia, serif;
+      display: block;
+      margin: 9px 0;
+      color: #fff;
+    }
+
+    .stat b {
+      width: 34px;
+      height: 34px;
+      border-radius: 7px;
+      background: #18345a;
+      display: grid;
+      place-items: center;
+      color: #7198ed;
+      font-size: 16px;
+    }
+
+    .stat.red b {
+      background: #41262d;
+      color: var(--status-danger);
+    }
+
+    .stat.green b {
+      background: #173e38;
+      color: var(--status-success);
+    }
+
+    .stat.gold b {
+      background: #40362a;
+      color: var(--accent-gold);
+    }
+
+    /* Panneaux */
+    .grid {
+      display: grid;
+      grid-template-columns: 1.65fr 1fr;
+      gap: 14px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--bg-panel);
+      padding: 21px;
+      margin-bottom: 20px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .panel h2 {
+      font: 400 18px Georgia, serif;
+      margin: 6px 0;
+      color: #fff;
+    }
+
+    .link {
+      border: 0;
+      background: none;
+      color: #7e97b6;
+      font-size: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+
+    /* Flux d'événements */
+    .event {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 13px 0;
+      border-top: 1px solid #1a3249;
+    }
+
+    .event:first-of-type {
+      border-top: none;
+    }
+
+    .event time {
+      font-size: 9px;
+      color: #8497aa;
+      font-family: monospace;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+    }
+
+    .event div {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .event small {
+      display: block;
+      font-size: 7px;
+      color: #6e8299;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+      letter-spacing: 0.05em;
+    }
+
+    .event strong {
+      display: block;
+      font-size: 10px;
+      color: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge {
+      font-size: 7px;
+      border-radius: 9px;
+      padding: 5px 8px;
+      background: #183249;
+      color: #95a7b9;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .badge.urgent {
+      background: #44262c;
+      color: var(--status-danger);
+    }
+
+    .badge.priority {
+      background: #413725;
+      color: var(--accent-gold);
+    }
+
+    .badge.done {
+      background: #173e36;
+      color: var(--status-success);
+    }
+
+    /* Actions rapides */
+    .quick button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 13px 0;
+      border: 0;
+      border-top: 1px solid #1a3249;
+      background: none;
+      color: #8196ad;
+      text-align: left;
+      cursor: pointer;
+      transition: background var(--transition-speed);
+    }
+
+    .quick button:hover {
+      background: rgba(255,255,255,0.01);
+    }
+
+    .quick button:first-of-type {
+      border-top: none;
+    }
+
+    .quick button > span {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: #172f49;
+      color: #7799e6;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+    }
+
+    .quick button div {
+      flex: 1;
+    }
+
+    .quick strong {
+      display: block;
+      font-size: 9px;
+      color: #dbe4ee;
+    }
+
+    .quick small {
+      display: block;
+      font-size: 7px;
+      margin-top: 4px;
+      color: #768aa1;
+    }
+
+    /* Tableaux et registres */
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin: 15px 0;
+    }
+
+    .tabs button {
+      border: 1px solid #263e55;
+      background: none;
+      color: #758aa1;
+      border-radius: 5px;
+      padding: 7px 12px;
+      font-size: 8px;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .tabs button:hover {
+      background: var(--bg-panel2);
+      color: #fff;
+    }
+
+    .tabs button.active {
+      background: #193653;
+      color: white;
+    }
+
+    .table {
+      border: 1px solid #1d364e;
+      border-radius: 7px;
+      overflow-x: auto;
+      background: #0a1726;
+    }
+
+    .row {
+      min-width: 670px;
+      display: grid;
+      grid-template-columns: 1.1fr 1.5fr 1.2fr 1fr 1fr;
+      border-top: 1px solid #193249;
+      align-items: center;
+      transition: background var(--transition-speed);
+    }
+
+    .row:hover {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .row:first-child {
+      border: 0;
+    }
+
+    .row span {
+      padding: 14px;
+      font-size: 9px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .row.head {
+      background: #102840;
+      color: #677d94;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .row.head span {
+      font-size: 7px;
+    }
+
+    .row.clickable {
+      cursor: pointer;
+    }
+
+    .good {
+      color: var(--status-success);
+      font-weight: bold;
+    }
+
+    .bad {
+      color: var(--status-danger);
+      font-weight: bold;
+    }
+
+    /* ==========================================
+       MODAL ET FORMULAIRES SÉCURISÉS
+       ========================================== */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: #020810c9;
+      display: grid;
+      place-items: center;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal {
+      width: min(510px, calc(100% - 25px));
+      background: #10243a;
+      border: 1px solid #2b435c;
+      border-radius: 11px;
+      padding: 29px;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .modal h2 {
+      font: 400 23px Georgia, serif;
+      margin: 8px 0;
+      color: #fff;
+    }
+
+    .close {
+      position: absolute;
+      right: 15px;
+      top: 10px;
+      background: none;
+      border: 0;
+      color: #7b8ea4;
+      font-size: 25px;
+      cursor: pointer;
+    }
+
+    .check-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin: 12px 0;
+    }
+
+    .check-list label {
+      margin: 0;
+      border: 1px solid #233c54;
+      border-radius: 7px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .check-list i {
+      width: 27px;
+      height: 23px;
+      border-radius: 4px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-style: normal;
+      font-size: 7px;
+      font-weight: bold;
+    }
+
+    .toast {
+      position: fixed;
+      right: 25px;
+      bottom: 25px;
+      padding: 13px 18px;
+      background: #173b35;
+      border: 1px solid #2c6b5e;
+      border-radius: 7px;
+      font-size: 10px;
+      color: #4bc9a1;
+      font-weight: bold;
+      z-index: 200;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      animation: slideUp 0.2s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Styles pour détails de fiches */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .detail-block {
+      background: #0d1f32;
+      border: 1px solid #1e364e;
+      border-radius: 7px;
+      padding: 15px;
+    }
+
+    .detail-block h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent-gold);
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 5px;
+    }
+
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+
+    .detail-item span:first-child {
+      color: var(--text-muted);
+    }
+
+    .detail-item span:last-child {
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .record-card {
+      background: rgba(236,106,101,0.05);
+      border: 1px solid rgba(236,106,101,0.15);
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+
+    .record-card strong {
+      display: block;
+      color: var(--status-danger);
+      margin-bottom: 4px;
+    }
+
+    /* Global Search Overlay (Ctrl K) */
+    .search-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.9);
+      backdrop-filter: blur(8px);
+      z-index: 150;
+      display: flex;
+      justify-content: center;
+      padding-top: 10vh;
+    }
+
+    .search-modal {
+      width: min(650px, calc(100% - 25px));
+    }
+
+    .search-results {
+      background: #10243a;
+      border: 1px solid #2b435c;
+      border-radius: 11px;
+      max-height: 60vh;
+      overflow-y: auto;
+      margin-top: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .result-group-title {
+      background: #0d1e33;
+      padding: 8px 15px;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-gold);
+      font-weight: bold;
+    }
+
+    .result-item {
+      padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background var(--transition-speed);
+    }
+
+    .result-item:hover {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .result-item-info strong {
+      display: block;
+      font-size: 11px;
+      color: #fff;
+    }
+
+    .result-item-info small {
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       CONCEPTION RESPONSIVE
+       ========================================== */
+    @media(max-width:950px){
+      .stats{grid-template-columns:1fr 1fr}
+      .grid{grid-template-columns:1fr}
+      .login{grid-template-columns:1fr}
+      .login-art{display:none}
+    }
+
+    @media(max-width:680px){
+      .app{display:block}
+      .sidebar{position:static;width:100%;height:auto}
+      .sidebar .brand{border:0}
+      .nav{display:grid;grid-template-columns:1fr 1fr}
+      .side-bottom{margin-top:15px}
+      .main{display:block}
+      .topbar{padding:0 14px}
+      .status,.clock{display:none}
+      .search{width:100%}
+      .content{padding:21px 14px}
+      .heading{align-items:start;gap:15px}
+      .stats{grid-template-columns:1fr}
+      .check-list{grid-template-columns:1fr}
+      .login-left{padding:35px 25px}
+      .login-foot{margin-top:35px}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================
+       PORTAIL DE CONNEXION SÉCURISÉ
+       ========================================== -->
+  <section id="login" class="login-container">
+    <div class="login-left">
+      <div class="brand">
+        <div class="seal">RF</div>
+        <div>
+          <strong>MDT–GTA–RP</strong>
+          <small>SYSTÈME OPÉRATIONNEL FRANÇAIS</small>
+        </div>
+      </div>
+
+      <div class="login-box">
+        <span class="eyebrow">ACCÈS SÉCURISÉ</span>
+        <h1>Portail des services publics</h1>
+        <p class="subtitle">Connectez-vous à votre espace opérationnel unifié.</p>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label>Matricule ou identifiant</label>
+            <input id="loginBadge" class="field" value="GND-0742" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label>Mot de passe de sécurité</label>
+            <input id="loginPassword" type="password" class="field" value="demo2026" required autocomplete="current-password">
+          </div>
+          <div class="form-group">
+            <label>Service actif</label>
+            <select id="loginService" class="field"></select>
+          </div>
+          <button class="primary" type="submit">Accéder au MDT →</button>
+          <p class="demo">Version de démonstration — identifiants préremplis</p>
+        </form>
+      </div>
+
+      <div class="login-foot">
+        <span class="online">● Système opérationnel</span>
+        <span>v2.0.0 • France RP</span>
+      </div>
+    </div>
+
+    <aside class="login-art">
+      <div class="flag"></div>
+      <div class="hero">
+        <span>PLATEFORME MULTI-SERVICES SÉCURISÉE</span>
+        <h2>Servir.<br>Protéger.<br><em>Coordonner.</em></h2>
+        <p>Un outil commun de centralisation pour l'ensemble des institutions publiques et judiciaires.</p>
+        <div id="serviceLogos" class="services"></div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ==========================================
+       ESPACE TERMINAL OPERATIONNEL PRINCIPAL
+       ========================================== -->
+  <section id="application" class="app hidden">
+    <!-- Sidebar de gauche -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="seal">RF</div>
+        <div>
+          <strong>MDT–GTA–RP</strong>
+          <small id="orgSmall">RÉPUBLIQUE FRANÇAISE</small>
+        </div>
+      </div>
+
+      <div class="service-switch">
+        <span id="serviceIcon" class="service-icon">✦</span>
+        <div>
+          <small>SERVICE ACTIF</small>
+          <strong id="serviceName">Gendarmerie</strong>
+        </div>
+        <select id="serviceSelect" aria-label="Changer de service"></select>
+      </div>
+
+      <nav id="nav" class="nav"></nav>
+
+      <div class="side-bottom">
+        <button id="configBtn" class="config"><span>⚙</span>Configurer le MDT</button>
+        <div class="profile">
+          <div id="agentAvatar" class="avatar">NN</div>
+          <p>
+            <strong id="agentNameDisplay">Noé Natter</strong>
+            <small id="agentRoleDisplay">Administrateur • GND-0742</small>
+          </p>
+          <button id="logout" class="logout" title="Déconnexion">↪</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Zone opérationnelle de droite -->
+    <main class="main">
+      <header class="topbar">
+        <div class="search">
+          ⌕
+          <input id="search" placeholder="Rechercher un citoyen, véhicule, dossier... (CTRL K)" autocomplete="off">
+          <kbd>CTRL K</kbd>
+        </div>
+        <div class="right">
+          <button class="status">● En service</button>
+          <div id="clock" class="clock"></div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="heading">
+          <div>
+            <span class="eyebrow" id="pageTag">CENTRE OPÉRATIONNEL</span>
+            <h1 id="pageTitle">Tableau de bord</h1>
+            <p id="pageDescription">Voici la situation opérationnelle en temps réel de votre juridiction.</p>
+          </div>
+          <div id="headerActions">
+            <!-- Injecté de manière dynamique par page -->
+          </div>
+        </div>
+
+        <!-- ZONE DE RENDU DES MODULES DYNAMIQUES -->
+        <div id="dynamicPageContent"></div>
+      </div>
+    </main>
+  </section>
+
+  <!-- ==========================================
+       MODALS DE DIALOGUES & POPUPS
+       ========================================== */ -->
+  <div id="modal" class="modal-bg hidden">
+    <section class="modal">
+      <button id="closeModal" class="close">×</button>
+      <span class="eyebrow" id="modalEyebrow">PERSONNALISATION</span>
+      <h2 id="modalTitle">Configurer votre MDT</h2>
+      <p class="subtitle" id="modalSubtitle">Adaptez l'identité et les services à votre serveur RP.</p>
+
+      <form id="modalForm">
+        <div id="modalBody">
+          <!-- Rempli en JS -->
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <!-- RECHERCHE GLOBALE SUPERPOSÉE (CTRL K) -->
+  <div id="globalSearchOverlay" class="search-overlay hidden">
+    <div class="search-modal">
+      <input type="text" id="globalSearchInput" class="field" style="font-size: 16px; padding: 18px;" placeholder="Recherche rapide globale... (Echap pour fermer)" autocomplete="off">
+      <div id="globalSearchResults" class="search-results">
+        <!-- Résultats de frappe instantanée -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST DE NOTIFICATION DYNAMIQUE -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- ==========================================
+       LOGIQUE APPLICATIVE SÉCURISÉE (JS)
+       ========================================== -->
+  <script>
+    // ==========================================
+    // INITIALISATION DE LA BASE DE DONNÉES LOCALSTORAGE
+    // ==========================================
+
+    const initialServices = [
+      { name: "Gendarmerie", code: "GN", color: "#6389e5", icon: "✦", enabled: true },
+      { name: "Police nationale", code: "PN", color: "#57a6ff", icon: "◆", enabled: true },
+      { name: "Sapeurs-pompiers", code: "SP", color: "#ef6b63", icon: "✚", enabled: true },
+      { name: "Hôpital", code: "CH", color: "#4fd0aa", icon: "+", enabled: true },
+      { name: "Gouvernement", code: "GVT", color: "#d5b374", icon: "●", enabled: true }
+    ];
+
+    const initialCitizens = [
+      { id: "FR-01", firstname: "Lucas", lastname: "Martin", birthdate: "12/04/1995", driverLicense: "Valide", wanted: false, phone: "555-4029", notes: "Aucune remarque spécifique.", records: [] },
+      { id: "FR-02", firstname: "Sarah", lastname: "Bernard", birthdate: "28/09/1998", driverLicense: "Suspendu", wanted: true, phone: "555-9011", notes: "Avis de recherche actif pour recel et complicité.", records: [{ date: "08/08/2026", title: "Vol de véhicule aggravé", type: "Délit", desc: "Complicité active et recel de Sultan Classic volée." }] },
+      { id: "FR-03", firstname: "Arthur", lastname: "Leroy", birthdate: "03/11/1991", driverLicense: "Valide", wanted: false, phone: "555-3392", notes: "Sapeur-Pompier volontaire.", records: [] },
+      { id: "FR-04", firstname: "Chloé", lastname: "Robert", birthdate: "15/07/2000", driverLicense: "Valide", wanted: false, phone: "555-8833", notes: "Citoyenne sans antécédents.", records: [] }
+    ];
+
+    const initialVehicles = [
+      { plate: "AA-123-BB", model: "Sultan Classic", color: "Noire", owner: "Lucas Martin", ownerId: "FR-01", wanted: true, reason: "Véhicule repéré sur un délit de fuite.", notes: "Vitres surteintées." },
+      { plate: "CC-456-DD", model: "Coquette", color: "Rouge", owner: "Arthur Leroy", ownerId: "FR-03", wanted: false, reason: "", notes: "Strictement d'origine." },
+      { plate: "EE-789-FF", model: "Bison", color: "Blanc", owner: "Sarah Bernard", ownerId: "FR-02", wanted: false, reason: "", notes: "Véhicule professionnel." }
+    ];
+
+    const initialInterventions = [
+      { id: "INT-001", time: "21:42", service: "SP", title: "Accident corporel — A6, sortie 14", status: "En cours", priority: "Urgent", badgeClass: "urgent", desc: "Collision arrière entre 2 véhicules légers." },
+      { id: "INT-002", time: "21:28", service: "GN", title: "Signalement Sultan noire recherchée", status: "En cours", priority: "Prioritaire", badgeClass: "priority", desc: "Aperçue à pleine vitesse sur la Senora Freeway." },
+      { id: "INT-003", time: "20:57", service: "PN", title: "Contrôle routier Place République", status: "Traité", priority: "Traité", badgeClass: "done", desc: "Fiche R.A.S., véhicule en règle." }
+    ];
+
+    const initialReports = [
+      { id: "REP-01", title: "Rapport d'infraction routière", date: "09/08/2026", citizenName: "Sarah Bernard", citizenId: "FR-02", author: "Noé Natter", content: "Excès de vitesse de plus de 50km/h relevé à l'encontre de Mme Bernard au volant de la Bison blanche. Permis suspendu sur-le-champ." }
+    ];
+
+    const initialCases = [
+      { id: "DOS-01", title: "Enquête Sultan Noire", status: "Actif", desc: "Enquête judiciaire ouverte concernant le réseau de vol et de recel de Sultan Classic noires sévissant dans la région.", citizenId: "FR-02", citizenName: "Sarah Bernard" }
+    ];
+
+    const initialConfig = {
+      orgName: "RÉPUBLIQUE FRANÇAISE",
+      agentName: "Noé Natter",
+      agentBadge: "GND-0742",
+      agentRole: "Administrateur"
+    };
+
+    // Chargeur de stockage localisé
+    function getStore(key, fallback) {
+      const data = localStorage.getItem("mdt_" + key);
+      if (!data) {
+        localStorage.setItem("mdt_" + key, JSON.stringify(fallback));
+        return fallback;
+      }
+      return JSON.parse(data);
+    }
+
+    function setStore(key, data) {
+      localStorage.setItem("mdt_" + key, JSON.stringify(data));
+    }
+
+    // Chargement de l'ensemble de la BD au démarrage
+    const db = {
+      services: getStore("services", initialServices),
+      citizens: getStore("citizens", initialCitizens),
+      vehicles: getStore("vehicles", initialVehicles),
+      interventions: getStore("interventions", initialInterventions),
+      reports: getStore("reports", initialReports),
+      cases: getStore("cases", initialCases),
+      config: getStore("config", initialConfig)
+    };
+
+    // ==========================================
+    // ETAPE 3 : SYSTEME D'AUTHENTIFICATION ET DE ROUTAGE
+    // ==========================================
+
+    const pages = [
+      { name: "Tableau de bord", icon: "⌂" },
+      { name: "Citoyens", icon: "♙" },
+      { name: "Véhicules", icon: "▣" },
+      { name: "Interventions", icon: "⚡" },
+      { name: "Rapports", icon: "▤" },
+      { name: "Dossiers", icon: "◇" }
+    ];
+
+    let activePage = "Tableau de bord";
+    let activeService = db.services[0];
+    const $ = id => document.getElementById(id);
+
+    // Initialise les sélecteurs de services (Login et App)
+    function buildServices() {
+      const selectHTML = db.services.filter(s => s.enabled).map(s => `<option value="${s.code}">${s.name}</option>`).join("");
+      $("loginService").innerHTML = selectHTML;
+      $("serviceSelect").innerHTML = selectHTML;
+
+      // Service logos en bas à droite de l'art de login
+      $("serviceLogos").innerHTML = db.services.filter(s => s.enabled).map(s => `
+        <div class="service-logo">
+          <b style="color:${s.color}">${s.icon}</b>
+          <small>${s.code}</small>
+        </div>
+      `).join("");
+    }
+
+    // Met à jour le service actif visuel
+    function selectService(code) {
+      const s = db.services.find(x => x.code === code) || db.services[0];
+      activeService = s;
+      $("serviceName").textContent = s.name;
+      $("serviceIcon").textContent = s.icon;
+      $("serviceIcon").style.background = s.color;
+      $("serviceSelect").value = s.code;
+    }
+
+    // Construit le menu de navigation
+    function renderNav() {
+      const activeAppeals = db.interventions.filter(i => i.status === "En cours").length;
+      $("nav").innerHTML = pages.map(p => `
+        <button class="${p.name === activePage ? 'active' : ''}" onclick="navigateToPage('${p.name}')">
+          <span>${p.icon}</span>${p.name}
+          ${p.name === "Interventions" && activeAppeals > 0 ? `<b>${activeAppeals}</b>` : ""}
+        </button>
+      `).join("");
+    }
+
+    // Fonction de routage des pages
+    function navigateToPage(pageName) {
+      activePage = pageName;
+      $("pageTitle").textContent = pageName;
+
+      const descriptions = {
+        "Tableau de bord": "Situation opérationnelle du service actif.",
+        "Citoyens": "Registre d'état civil, antécédents judiciaires et permis nationaux.",
+        "Véhicules": "Registre national des immatriculations et avis de recherche actifs.",
+        "Interventions": "Gestion des appels d'urgence et répartition des patrouilles.",
+        "Rapports": "Rédaction et consignation de rapports officiels d'intervention.",
+        "Dossiers": "Dossiers d'enquête criminelle et mandats d'arrêt émis."
+      };
+
+      $("pageDescription").textContent = descriptions[pageName] || "";
+      renderNav();
+
+      // Appel du moteur de rendu dynamique
+      renderDynamicPage();
+    }
+
+    // Horloge temps réel
+    function startClock() {
+      function tick() {
+        const d = new Date();
+        const dateStr = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
+        const timeStr = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        $("clock").innerHTML = `<small>${dateStr}</small><strong>${timeStr}</strong>`;
+      }
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    // Notification toast rapide
+    function notify(message) {
+      const t = $("toast");
+      t.textContent = message;
+      t.classList.remove("hidden");
+      setTimeout(() => {
+        t.classList.add("hidden");
+      }, 2500);
+    }
+
+    // Formulaire de connexion
+    $("loginForm").onsubmit = (e) => {
+      e.preventDefault();
+
+      const badge = $("loginBadge").value.trim();
+      const config = db.config;
+
+      // Attribution d'un nom selon le badge de demo
+      if (badge === "GND-0742") {
+        config.agentName = "Noé Natter";
+        config.agentRole = "Administrateur";
+      } else {
+        config.agentName = badge;
+        config.agentRole = "Officier de Patrouille";
+      }
+      config.agentBadge = badge;
+      setStore("config", config);
+
+      // Met à jour le profil de l'agent en sidebar
+      $("agentNameDisplay").textContent = config.agentName;
+      $("agentRoleDisplay").textContent = `${config.agentRole} • ${config.agentBadge}`;
+      $("agentAvatar").textContent = config.agentName.split(" ").map(n => n[0]).join("").toUpperCase();
+
+      selectService($("loginService").value);
+
+      // Bascule d'écrans
+      $("login").classList.add("hidden");
+      $("application").classList.remove("hidden");
+
+      navigateToPage("Tableau de bord");
+      notify(`Connexion établie — Matricule ${badge}`);
+    };
+
+    // Déconnexion
+    $("logout").onclick = () => {
+      $("application").classList.add("hidden");
+      $("login").classList.remove("hidden");
+      notify("Déconnexion sécurisée effectuée.");
+    };
+
+    // Gestion du sélecteur de service en sidebar
+    $("serviceSelect").onchange = (e) => {
+      selectService(e.target.value);
+      notify(`Service actif : ${activeService.name}`);
+      navigateToPage(activePage);
+    };
+
+    // Initialisation au chargement
+    buildServices();
+    startClock();
+
+
+    // ==========================================
+    // ETAPE 4, 5 & 6 : RENDU COMPLET ET INTERACTIF DES MODULES
+    // ==========================================
+
+    let citizensFilter = "Tous";
+    let citizensSearch = "";
+    let vehiclesSearch = "";
+    let interventionsFilter = "Tous";
+    let reportsSearch = "";
+    let casesFilter = "Tous";
+
+    function renderDynamicPage() {
+      const actions = $("headerActions");
+      actions.innerHTML = ""; // Vider par défaut
+
+      const content = $("dynamicPageContent");
+
+      if (activePage === "Tableau de bord") {
+        // --- RENDU TABLEAU DE BORD ---
+        const totalAgents = 24;
+        const totalInterventions = db.interventions.filter(i => i.status === "En cours").length;
+        const totalReports = db.reports.length;
+        const totalWanted = db.citizens.filter(c => c.wanted).length + db.vehicles.filter(v => v.wanted).length;
+
+        content.innerHTML = `
+          <div class="stats">
+            <article class="stat">
+              <div>
+                <span>Agents en service</span>
+                <strong>${totalAgents}</strong>
+                <small>+3 depuis 18h</small>
+              </div>
+              <b>♙</b>
+            </article>
+            <article class="stat red">
+              <div>
+                <span>Interventions actives</span>
+                <strong>${String(totalInterventions).padStart(2, '0')}</strong>
+                <small>En cours de traitement</small>
+              </div>
+              <b>⚡</b>
+            </article>
+            <article class="stat green">
+              <div>
+                <span>Rapports enregistrés</span>
+                <strong>${String(totalReports).padStart(2, '0')}</strong>
+                <small>Persistés en base</small>
+              </div>
+              <b>▤</b>
+            </article>
+            <article class="stat gold">
+              <div>
+                <span>Avis de recherche</span>
+                <strong>${String(totalWanted).padStart(2, '0')}</strong>
+                <small>Cibles prioritaires</small>
+              </div>
+              <b>◇</b>
+            </article>
+          </div>
+
+          <div class="grid">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <span class="eyebrow">TEMPS RÉEL</span>
+                  <h2>Activité récente</h2>
+                </div>
+                <button class="link" onclick="navigateToPage('Interventions')">Voir tout →</button>
+              </div>
+              <div id="events">
+                ${db.interventions.map(e => `
+                  <article class="event">
+                    <time>${e.time}</time>
+                    <i class="dot" style="background: ${e.status === 'En cours' ? 'var(--status-danger)' : 'var(--status-success)'};"></i>
+                    <div>
+                      <small>INTERVENTION • ${e.service} • APPEL</small>
+                      <strong>${e.title}</strong>
+                    </div>
+                    <span class="badge ${e.badgeClass}">${e.priority}</span>
+                  </article>
+                `).join("")}
+              </div>
+            </section>
+
+            <aside class="panel quick">
+              <div class="panel-head">
+                <div>
+                  <span class="eyebrow">ACCÈS DIRECT</span>
+                  <h2>Actions rapides</h2>
+                </div>
+              </div>
+              <button onclick="navigateToPage('Citoyens')">
+                <span>♙</span>
+                <div>
+                  <strong>Rechercher un citoyen</strong>
+                  <small>Identité, antécédents et permis</small>
+                </div>
+                →
+              </button>
+              <button onclick="navigateToPage('Véhicules')">
+                <span>▣</span>
+                <div>
+                  <strong>Contrôler un véhicule</strong>
+                  <small>Immatriculation et propriétaire</small>
+                </div>
+                →
+              </button>
+              <button onclick="navigateToPage('Interventions')">
+                <span>⚡</span>
+                <div>
+                  <strong>Créer une intervention</strong>
+                  <small>Déployer et coordonner les unités</small>
+                </div>
+                →
+              </button>
+              <button onclick="navigateToPage('Dossiers')">
+                <span>◇</span>
+                <div>
+                  <strong>Ouvrir un dossier</strong>
+                  <small>Enquête et procédure judiciaire</small>
+                </div>
+                →
+              </button>
+            </aside>
+          </div>
+        `;
+      }
+
+      else if (activePage === "Citoyens") {
+        // --- RENDU REGISTRE CITOYENS ---
+        actions.innerHTML = `<button class="primary" onclick="openCreateCitizenModal()">＋ Enregistrer un citoyen</button>`;
+
+        const filtered = db.citizens.filter(c => {
+          const matchSearch = `${c.firstname} ${c.lastname} ${c.id} ${c.phone}`.toLowerCase().includes(citizensSearch.toLowerCase());
+          if (citizensFilter === "Recherchés") return matchSearch && c.wanted;
+          if (citizensFilter === "Permis Suspendu") return matchSearch && c.driverLicense === "Suspendu";
+          return matchSearch;
+        });
+
+        content.innerHTML = `
+          <div class="tabs">
+            <button class="${citizensFilter === 'Tous' ? 'active' : ''}" onclick="setCitizensFilter('Tous')">Tous</button>
+            <button class="${citizensFilter === 'Recherchés' ? 'active' : ''}" onclick="setCitizensFilter('Recherchés')">Recherchés</button>
+            <button class="${citizensFilter === 'Permis Suspendu' ? 'active' : ''}" onclick="setCitizensFilter('Permis Suspendu')">Permis Suspendu</button>
+          </div>
+
+          <div style="margin-bottom:15px; display:flex; gap:10px;">
+            <input type="text" id="citizenSearchInput" class="field" style="padding:10px;" placeholder="Rechercher par nom, ID ou téléphone..." value="${citizensSearch}">
+          </div>
+
+          <div class="table">
+            <div class="row head">
+              <span>Identifiant</span>
+              <span>Nom / Prénom</span>
+              <span>Téléphone</span>
+              <span>Permis</span>
+              <span>Recherche</span>
+            </div>
+            <div>
+              ${filtered.map(c => `
+                <div class="row clickable" onclick="viewCitizenDetails('${c.id}')">
+                  <span style="font-family:monospace; font-weight:bold; color:var(--accent-gold);">${c.id}</span>
+                  <span><strong>${c.lastname.toUpperCase()}</strong> ${c.firstname}</span>
+                  <span>${c.phone || "Non renseigné"}</span>
+                  <span class="${c.driverLicense === 'Valide' ? 'good' : 'bad'}">${c.driverLicense}</span>
+                  <span>${c.wanted ? '<span class="badge urgent">Avis Actif</span>' : '<span class="badge">Aucun</span>'}</span>
+                </div>
+              `).join("")}
+              ${filtered.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--text-muted);">Aucun citoyen correspondant.</div>` : ""}
+            </div>
+          </div>
+        `;
+
+        $("citizenSearchInput").oninput = (e) => {
+          citizensSearch = e.target.value;
+          renderDynamicPage();
+        };
+        $("citizenSearchInput").focus();
+      }
+
+      else if (activePage === "Véhicules") {
+        // --- RENDU REGISTRE VEHICULES ---
+        actions.innerHTML = `<button class="primary" onclick="openCreateVehicleModal()">＋ Immatriculer un véhicule</button>`;
+
+        const filtered = db.vehicles.filter(v => {
+          return `${v.plate} ${v.model} ${v.owner} ${v.color}`.toLowerCase().includes(vehiclesSearch.toLowerCase());
+        });
+
+        content.innerHTML = `
+          <div style="margin-bottom:15px;">
+            <input type="text" id="vehicleSearchInput" class="field" style="padding:10px;" placeholder="Rechercher par plaque, marque, propriétaire..." value="${vehiclesSearch}">
+          </div>
+
+          <div class="table">
+            <div class="row head">
+              <span>Plaque</span>
+              <span>Modèle / Couleur</span>
+              <span>Propriétaire</span>
+              <span>Signalement</span>
+              <span>Action</span>
+            </div>
+            <div>
+              ${filtered.map(v => `
+                <div class="row">
+                  <span style="font-family:monospace; font-weight:bold; color:var(--accent-gold);">${v.plate}</span>
+                  <span>${v.model} (${v.color})</span>
+                  <span class="clickable" style="text-decoration:underline;" onclick="viewCitizenDetails('${v.ownerId}')">${v.owner}</span>
+                  <span>${v.wanted ? `<span class="badge urgent" title="${v.reason}">Recherché</span>` : '<span class="badge done">En règle</span>'}</span>
+                  <span><button class="primary" style="padding:5px 10px; font-size:8px;" onclick="viewVehicleDetails('${v.plate}')">Consulter</button></span>
+                </div>
+              `).join("")}
+              ${filtered.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--text-muted);">Aucun véhicule répertorié.</div>` : ""}
+            </div>
+          </div>
+        `;
+
+        $("vehicleSearchInput").oninput = (e) => {
+          vehiclesSearch = e.target.value;
+          renderDynamicPage();
+        };
+        $("vehicleSearchInput").focus();
+      }
+
+      else if (activePage === "Interventions") {
+        // --- 5. INTERVENTIONS ---
+        actions.innerHTML = `<button class="primary" onclick="openCreateInterventionModal()">＋ Créer un appel</button>`;
+
+        const filtered = db.interventions.filter(i => {
+          if (interventionsFilter === "En cours") return i.status === "En cours";
+          if (interventionsFilter === "Clôturées") return i.status === "Traité" || i.status === "Clôturée";
+          return true;
+        });
+
+        content.innerHTML = `
+          <div class="tabs">
+            <button class="${interventionsFilter === 'Tous' ? 'active' : ''}" onclick="setInterventionsFilter('Tous')">Tous</button>
+            <button class="${interventionsFilter === 'En cours' ? 'active' : ''}" onclick="setInterventionsFilter('En cours')">En cours</button>
+            <button class="${interventionsFilter === 'Clôturées' ? 'active' : ''}" onclick="setInterventionsFilter('Clôturées')">Clôturées</button>
+          </div>
+
+          <div class="table">
+            <div class="row head">
+              <span>ID / Heure</span>
+              <span>Titre de l'appel</span>
+              <span>Service</span>
+              <span>Urgence</span>
+              <span>État / Action</span>
+            </div>
+            <div>
+              ${filtered.map(i => `
+                <div class="row">
+                  <span style="font-family:monospace;">${i.id} (${i.time})</span>
+                  <span><strong>${i.title}</strong><br><small style="color:var(--text-muted);">${i.desc}</small></span>
+                  <span><span class="badge">${i.service}</span></span>
+                  <span><span class="badge ${i.badgeClass}">${i.priority}</span></span>
+                  <span>
+                    ${i.status === "En cours" ? `
+                      <button class="primary" style="background:var(--status-success); color:#172235; padding:5px 8px; font-size:8px;" onclick="closeIntervention('${i.id}')">Clôturer</button>
+                    ` : `
+                      <span class="good">Traité</span>
+                    `}
+                  </span>
+                </div>
+              `).join("")}
+              ${filtered.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--text-muted);">Aucune intervention correspondante.</div>` : ""}
+            </div>
+          </div>
+        `;
+      }
+
+      else if (activePage === "Rapports") {
+        // --- 5. RAPPORTS ---
+        actions.innerHTML = `<button class="primary" onclick="openCreateReportModal()">＋ Déposer un rapport</button>`;
+
+        const filtered = db.reports.filter(r => {
+          return `${r.title} ${r.citizenName} ${r.author} ${r.content}`.toLowerCase().includes(reportsSearch.toLowerCase());
+        });
+
+        content.innerHTML = `
+          <div style="margin-bottom:15px;">
+            <input type="text" id="reportSearchInput" class="field" style="padding:10px;" placeholder="Filtrer les rapports..." value="${reportsSearch}">
+          </div>
+
+          <div class="table">
+            <div class="row head">
+              <span>Date</span>
+              <span>Titre du rapport</span>
+              <span>Rédacteur</span>
+              <span>Citoyen lié</span>
+              <span>Action</span>
+            </div>
+            <div>
+              ${filtered.map(r => `
+                <div class="row">
+                  <span>${r.date}</span>
+                  <span><strong>${r.title}</strong></span>
+                  <span>${r.author}</span>
+                  <span class="clickable" style="text-decoration:underline;" onclick="viewCitizenDetails('${r.citizenId}')">${r.citizenName}</span>
+                  <span><button class="primary" style="padding:5px 10px; font-size:8px;" onclick="viewReportDetails('${r.id}')">Ouvrir</button></span>
+                </div>
+              `).join("")}
+              ${filtered.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--text-muted);">Aucun rapport répertorié.</div>` : ""}
+            </div>
+          </div>
+        `;
+
+        $("reportSearchInput").oninput = (e) => {
+          reportsSearch = e.target.value;
+          renderDynamicPage();
+        };
+        $("reportSearchInput").focus();
+      }
+
+      else if (activePage === "Dossiers") {
+        // --- 6. DOSSIERS ---
+        actions.innerHTML = `<button class="primary" onclick="openCreateCaseModal()">＋ Ouvrir une enquête</button>`;
+
+        const filtered = db.cases.filter(c => {
+          if (casesFilter === "Actif") return c.status === "Actif";
+          if (casesFilter === "Archivé") return c.status === "Archivé";
+          return true;
+        });
+
+        content.innerHTML = `
+          <div class="tabs">
+            <button class="${casesFilter === 'Tous' ? 'active' : ''}" onclick="setCasesFilter('Tous')">Tous</button>
+            <button class="${casesFilter === 'Actif' ? 'active' : ''}" onclick="setCasesFilter('Actif')">Actifs</button>
+            <button class="${casesFilter === 'Archivé' ? 'active' : ''}" onclick="setCasesFilter('Archivé')">Archivés</button>
+          </div>
+
+          <div class="table">
+            <div class="row head">
+              <span>ID</span>
+              <span>Titre de l'enquête</span>
+              <span>Description rapide</span>
+              <span>Suspect principal</span>
+              <span>Statut / Action</span>
+            </div>
+            <div>
+              ${filtered.map(c => `
+                <div class="row">
+                  <span style="font-family:monospace; font-weight:bold; color:var(--accent-gold);">${c.id}</span>
+                  <span><strong>${c.title}</strong></span>
+                  <span>${c.desc}</span>
+                  <span class="clickable" style="text-decoration:underline;" onclick="viewCitizenDetails('${c.citizenId}')">${c.citizenName}</span>
+                  <span>
+                    <span class="badge ${c.status === 'Actif' ? 'urgent' : ''}">${c.status}</span>
+                    ${c.status === "Actif" ? `
+                      <button class="primary" style="padding:4px 6px; font-size:8px; margin-left:5px; background:var(--status-success); color:#172235;" onclick="archiveCase('${c.id}')">Archiver</button>
+                    ` : ""}
+                  </span>
+                </div>
+              `).join("")}
+              ${filtered.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--text-muted);">Aucun dossier criminel.</div>` : ""}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Gestionnaires de filtres
+    function setCitizensFilter(filter) {
+      citizensFilter = filter;
+      renderDynamicPage();
+    }
+    function setInterventionsFilter(filter) {
+      interventionsFilter = filter;
+      renderDynamicPage();
+    }
+    function setCasesFilter(filter) {
+      casesFilter = filter;
+      renderDynamicPage();
+    }
+
+    // Clôture d'intervention
+    function closeIntervention(id) {
+      const i = db.interventions.find(x => x.id === id);
+      if (i) {
+        i.status = "Traité";
+        i.priority = "Traité";
+        i.badgeClass = "done";
+        setStore("interventions", db.interventions);
+        notify("Intervention clôturée et archivée.");
+        renderDynamicPage();
+      }
+    }
+
+    // Archivage de dossier criminel
+    function archiveCase(id) {
+      const c = db.cases.find(x => x.id === id);
+      if (c) {
+        c.status = "Archivé";
+        setStore("cases", db.cases);
+        notify("Dossier d'enquête archivé.");
+        renderDynamicPage();
+      }
+    }
+
+    // ==========================================
+    // DIALOGUES ET MODALS SECURISEES POUR L'ETAPE 4, 5 & 6
+    // ==========================================
+
+    const modal = $("modal");
+    const modalBody = $("modalBody");
+    const modalTitle = $("modalTitle");
+    const modalSubtitle = $("modalSubtitle");
+    const modalEyebrow = $("modalEyebrow");
+
+    function openModal(title, subtitle, eyebrow, bodyHTML) {
+      modalTitle.textContent = title;
+      modalSubtitle.textContent = subtitle;
+      modalEyebrow.textContent = eyebrow;
+      modalBody.innerHTML = bodyHTML;
+      modal.classList.remove("hidden");
+    }
+
+    $("closeModal").onclick = () => {
+      modal.classList.add("hidden");
+    };
+
+    // --- ENREGISTRER CITOYEN ---
+    function openCreateCitizenModal() {
+      const form = `
+        <div class="form-group">
+          <label>Identifiant unique (Format: FR-XX)</label>
+          <input type="text" id="newCitId" class="field" value="FR-${String(db.citizens.length + 1).padStart(2, '0')}" required>
+        </div>
+        <div class="form-group">
+          <label>Nom de famille</label>
+          <input type="text" id="newCitLastname" class="field" placeholder="Ex: Martin" required>
+        </div>
+        <div class="form-group">
+          <label>Prénom</label>
+          <input type="text" id="newCitFirstname" class="field" placeholder="Ex: Lucas" required>
+        </div>
+        <div class="form-group">
+          <label>Date de Naissance</label>
+          <input type="text" id="newCitBirth" class="field" placeholder="Ex: 12/04/1995" required>
+        </div>
+        <div class="form-group">
+          <label>Numéro de téléphone</label>
+          <input type="text" id="newCitPhone" class="field" placeholder="Ex: 555-1234">
+        </div>
+        <button class="primary" type="submit" style="width:100%; margin-top:10px;">Valider l'enregistrement</button>
+      `;
+
+      openModal("Enregistrer un citoyen", "Inscrire un nouveau citoyen dans la base civile.", "DOSSIER CIVIL", form);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        const newCit = {
+          id: $("newCitId").value.trim().toUpperCase(),
+          lastname: $("newCitLastname").value.trim(),
+          firstname: $("newCitFirstname").value.trim(),
+          birthdate: $("newCitBirth").value.trim(),
+          phone: $("newCitPhone").value.trim() || "Non renseigné",
+          driverLicense: "Valide",
+          wanted: false,
+          notes: "Nouvel arrivant.",
+          records: []
+        };
+
+        db.citizens.push(newCit);
+        setStore("citizens", db.citizens);
+        modal.classList.add("hidden");
+        notify(`Citoyen enregistré : ${newCit.firstname} ${newCit.lastname}`);
+        renderDynamicPage();
+      };
+    }
+
+    // --- ENREGISTRER VEHICULE ---
+    function openCreateVehicleModal() {
+      const ownersSelect = db.citizens.map(c => `<option value="${c.id}">${c.lastname.toUpperCase()} ${c.firstname}</option>`).join("");
+
+      const form = `
+        <div class="form-group">
+          <label>Plaque d'immatriculation (Format: XX-XXX-XX)</label>
+          <input type="text" id="newVehPlate" class="field" placeholder="Ex: AA-123-BB" required style="font-family:monospace; text-transform:uppercase;">
+        </div>
+        <div class="form-group">
+          <label>Modèle de véhicule</label>
+          <input type="text" id="newVehModel" class="field" placeholder="Ex: Sultan Classic" required>
+        </div>
+        <div class="form-group">
+          <label>Couleur</label>
+          <input type="text" id="newVehColor" class="field" placeholder="Ex: Noire" required>
+        </div>
+        <div class="form-group">
+          <label>Propriétaire du véhicule</label>
+          <select id="newVehOwner" class="field">${ownersSelect}</select>
+        </div>
+        <button class="primary" type="submit" style="width:100%; margin-top:10px;">Valider l'immatriculation</button>
+      `;
+
+      openModal("Immatriculer un véhicule", "Enregistrement d'une nouvelle carte grise.", "REGISTRE SÉCURISÉ", form);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        const ownerId = $("newVehOwner").value;
+        const owner = db.citizens.find(c => c.id === ownerId);
+
+        const newVeh = {
+          plate: $("newVehPlate").value.trim().toUpperCase(),
+          model: $("newVehModel").value.trim(),
+          color: $("newVehColor").value.trim(),
+          owner: `${owner.lastname} ${owner.firstname}`,
+          ownerId: owner.id,
+          wanted: false,
+          reason: "",
+          notes: "Aucune remarque."
+        };
+
+        db.vehicles.push(newVeh);
+        setStore("vehicles", db.vehicles);
+        modal.classList.add("hidden");
+        notify(`Véhicule immatriculé : ${newVeh.plate}`);
+        renderDynamicPage();
+      };
+    }
+
+    // --- DETAILS CITOYEN ---
+    function viewCitizenDetails(id) {
+      const c = db.citizens.find(x => x.id === id);
+      if (!c) return;
+
+      const userVehicles = db.vehicles.filter(v => v.ownerId === c.id);
+
+      const html = `
+        <div class="detail-grid">
+          <div class="detail-block">
+            <h3>Informations Générales</h3>
+            <div class="detail-item"><span>Identifiant</span><span>${c.id}</span></div>
+            <div class="detail-item"><span>Nom Complet</span><span>${c.lastname.toUpperCase()} ${c.firstname}</span></div>
+            <div class="detail-item"><span>Date de naissance</span><span>${c.birthdate}</span></div>
+            <div class="detail-item"><span>Téléphone</span><span>${c.phone || "Inconnu"}</span></div>
+          </div>
+
+          <div class="detail-block">
+            <h3>Droits & Titres</h3>
+            <div class="form-group">
+              <label>Permis de conduire</label>
+              <select id="editCitLicense" class="field" style="padding:8px;">
+                <option value="Valide" ${c.driverLicense === "Valide" ? "selected" : ""}>Valide</option>
+                <option value="Suspendu" ${c.driverLicense === "Suspendu" ? "selected" : ""}>Suspendu</option>
+                <option value="Annulé" ${c.driverLicense === "Annulé" ? "selected" : ""}>Annulé</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-top:10px;">
+              <label><input type="checkbox" id="editCitWanted" ${c.wanted ? "checked" : ""}> Recherché activement</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-grid" style="grid-template-columns:1fr;">
+          <div class="detail-block">
+            <h3>Remarques de patrouille</h3>
+            <textarea id="editCitNotes" class="field" style="min-height:70px; resize:vertical;">${c.notes || ""}</textarea>
+          </div>
+        </div>
+
+        <div class="detail-grid" style="grid-template-columns:1fr;">
+          <div class="detail-block">
+            <h3>Véhicules possédés (${userVehicles.length})</h3>
+            ${userVehicles.map(v => `
+              <div class="detail-item" style="border-bottom:1px solid rgba(255,255,255,0.02); padding-bottom:5px;">
+                <span style="font-family:monospace; font-weight:bold; color:var(--accent-gold);">${v.plate}</span>
+                <span>${v.model} (${v.color}) ${v.wanted ? '<b style="color:var(--status-danger);">[RECHERCHÉ]</b>' : ''}</span>
+              </div>
+            `).join("")}
+            ${userVehicles.length === 0 ? '<div style="color:var(--text-muted); font-size:11px;">Aucun véhicule enregistré.</div>' : ''}
+          </div>
+        </div>
+
+        <div class="detail-grid" style="grid-template-columns:1fr;">
+          <div class="detail-block">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <h3 style="margin-bottom:0;">Casier Judiciaire</h3>
+              <button type="button" class="primary" style="font-size:8px; padding:4px 8px;" onclick="openAddViolationModal('${c.id}')">＋ Ajouter infraction</button>
+            </div>
+            <div style="max-height:200px; overflow-y:auto; padding-right:5px;">
+              ${c.records.map(r => `
+                <div class="record-card">
+                  <strong>${r.title} — ${r.type}</strong>
+                  <p style="color:var(--text-muted); font-size:10px; margin-bottom:4px;">${r.desc || "Sans description."}</p>
+                  <small style="color:var(--accent-gold); font-size:8px;">Date : ${r.date}</small>
+                </div>
+              `).join("")}
+              ${c.records.length === 0 ? '<div style="color:var(--text-muted); font-size:11px; text-align:center;">Casier vierge.</div>' : ''}
+            </div>
+          </div>
+        </div>
+
+        <button class="primary" type="submit" style="width:100%; margin-top:15px;">Sauvegarder la fiche civile</button>
+      `;
+
+      openModal(`Dossier Civil : ${c.firstname} ${c.lastname.toUpperCase()}`, "Consulter et modifier l'état ou les notes du citoyen.", "CENTRE DE DONNÉES", html);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        c.driverLicense = $("editCitLicense").value;
+        c.wanted = $("editCitWanted").checked;
+        c.notes = $("editCitNotes").value.trim();
+
+        setStore("citizens", db.citizens);
+        modal.classList.add("hidden");
+        notify("Fiche civile enregistrée.");
+        renderDynamicPage();
+      };
+    }
+
+    // --- INFRACTION DIRECTE ---
+    function openAddViolationModal(citId) {
+      const c = db.citizens.find(x => x.id === citId);
+      if (!c) return;
+
+      const bodyHTML = `
+        <div class="form-group">
+          <label>Libellé de l'infraction</label>
+          <input type="text" id="violTitle" class="field" placeholder="Ex: Excès de vitesse majeur (>50km/h)" required>
+        </div>
+        <div class="form-group">
+          <label>Type de délit</label>
+          <select id="violType" class="field">
+            <option>Contravention</option>
+            <option>Délit</option>
+            <option>Crime</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description des faits</label>
+          <textarea id="violDesc" class="field" style="min-height:60px;" placeholder="Ex: Flashé à 160km/h au lieu de 90km/h..."></textarea>
+        </div>
+        <button class="primary" type="submit" style="width:100%; margin-top:10px;">Inscrire au casier</button>
+      `;
+
+      openModal("Ajouter une infraction", `Sanctionner ${c.firstname} ${c.lastname.toUpperCase()}`, "DÉCISION JUDICIAIRE", bodyHTML);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        const record = {
+          date: new Date().toLocaleDateString("fr-FR"),
+          title: $("violTitle").value.trim(),
+          type: $("violType").value,
+          desc: $("violDesc").value.trim()
+        };
+
+        c.records.unshift(record);
+        setStore("citizens", db.citizens);
+
+        // Réouvrir la fiche civile actualisée
+        viewCitizenDetails(citId);
+        notify("Infraction ajoutée au casier.");
+      };
+    }
+
+    // --- DETAILS VEHICULE ---
+    function viewVehicleDetails(plate) {
+      const v = db.vehicles.find(x => x.plate === plate);
+      if (!v) return;
+
+      const html = `
+        <div style="background:var(--bg-panel2); padding:15px; border-radius:7px; border:1px solid var(--line); text-align:center; margin-bottom:15px;">
+          <h1 style="font-family:monospace; font-size:24px; color:var(--accent-gold); letter-spacing:1.5px;">${v.plate}</h1>
+          <p style="font-size:10px; color:var(--text-muted); margin-top:4px;">${v.model.toUpperCase()} • ${v.color.toUpperCase()}</p>
+        </div>
+
+        <div class="detail-block">
+          <h3>Propriétaire Référencé</h3>
+          <div class="detail-item">
+            <span>Nom</span>
+            <span class="clickable" style="text-decoration:underline; color:var(--accent-blue);" onclick="viewCitizenDetails('${v.ownerId}')">${v.owner}</span>
+          </div>
+        </div>
+
+        <div class="detail-block" style="margin-top:15px;">
+          <h3>Signalement & Remarques</h3>
+          <div class="form-group">
+            <label><input type="checkbox" id="editVehWanted" ${v.wanted ? "checked" : ""}> Signaler ce véhicule</label>
+          </div>
+          <div class="form-group" id="vehReasonGroup" style="margin-top:10px;" class="${v.wanted ? "" : "hidden"}">
+            <label>Motif de recherche active</label>
+            <input type="text" id="editVehReason" class="field" placeholder="Ex: Volé devant l'hôpital..." value="${v.reason || ""}">
+          </div>
+          <div class="form-group" style="margin-top:10px;">
+            <label>Notes complémentaires</label>
+            <textarea id="editVehNotes" class="field" style="min-height:60px;">${v.notes || ""}</textarea>
+          </div>
+        </div>
+
+        <button class="primary" type="submit" style="width:100%; margin-top:15px;">Enregistrer la fiche véhicule</button>
+      `;
+
+      openModal("Fiche Véhicule", `Immatriculation ${v.plate}`, "CENTRE DE DONNÉES", html);
+
+      $("editVehWanted").onchange = (e) => {
+        $("vehReasonGroup").classList.toggle("hidden", !e.target.checked);
+      };
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        v.wanted = $("editVehWanted").checked;
+        v.reason = v.wanted ? $("editVehReason").value.trim() : "";
+        v.notes = $("editVehNotes").value.trim();
+
+        setStore("vehicles", db.vehicles);
+        modal.classList.add("hidden");
+        notify("Fiche véhicule enregistrée.");
+        renderDynamicPage();
+      };
+    }
+
+    // --- DETAILS RAPPORTS ---
+    function viewReportDetails(id) {
+      const r = db.reports.find(x => x.id === id);
+      if (!r) return;
+
+      const html = `
+        <div class="detail-block">
+          <h3>Membres de l'intervention</h3>
+          <div class="detail-item"><span>Rédacteur</span><span>${r.author}</span></div>
+          <div class="detail-item"><span>Citoyen concerné</span><span>${r.citizenName}</span></div>
+          <div class="detail-item"><span>Date</span><span>${r.date}</span></div>
+        </div>
+
+        <div class="detail-block" style="margin-top:15px;">
+          <h3>Compte rendu des faits</h3>
+          <p style="font-size:12px; line-height:1.6; white-space:pre-wrap; color:var(--text-main);">${r.content}</p>
+        </div>
+
+        <button class="primary" type="button" style="width:100%; margin-top:15px;" onclick="modal.classList.add('hidden')">Fermer la lecture</button>
+      `;
+
+      openModal(r.title, "Rapport d'enquête numérisé.", "CONSIGNATION DE PROCÉDURE", html);
+    }
+
+    // --- FORMULAIRE CRÉATION INTERVENTION ---
+    function openCreateInterventionModal() {
+      const bodyHTML = `
+        <div class="form-group">
+          <label>Titre de l'appel</label>
+          <input type="text" id="newIntTitle" class="field" placeholder="Ex: Tapage nocturne Place République" required>
+        </div>
+        <div class="form-group">
+          <label>Niveau de priorité</label>
+          <select id="newIntPriority" class="field">
+            <option value="Urgent">Urgent</option>
+            <option value="Prioritaire">Prioritaire</option>
+            <option value="Normal">Normal</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description du signalement</label>
+          <textarea id="newIntDesc" class="field" style="min-height:80px;" placeholder="Détails transmis par la centrale de dispatch..." required></textarea>
+        </div>
+        <button class="primary" type="submit" style="width:100%; margin-top:10px;">Lancer l'intervention</button>
+      `;
+
+      openModal("Créer une intervention", "Déployer des patrouilles sur un appel réseau.", "DISPATCH CENTRE", bodyHTML);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        const p = $("newIntPriority").value;
+        const badgeClass = p === "Urgent" ? "urgent" : (p === "Prioritaire" ? "priority" : "");
+
+        const newInt = {
+          id: "INT-" + String(db.interventions.length + 1).padStart(3, '0'),
+          time: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+          service: activeService.code,
+          title: $("newIntTitle").value.trim(),
+          status: "En cours",
+          priority: p,
+          badgeClass: badgeClass,
+          desc: $("newIntDesc").value.trim()
+        };
+
+        db.interventions.unshift(newInt);
+        setStore("interventions", db.interventions);
+        modal.classList.add("hidden");
+        notify("Appel d'urgence dispatché aux patrouilles !");
+        renderDynamicPage();
+      };
+    }
+
+    // --- FORMULAIRE DÉPOSITION RAPPORT ---
+    function openCreateReportModal() {
+      const citizensOptions = db.citizens.map(c => `<option value="${c.id}">${c.lastname.toUpperCase()} ${c.firstname}</option>`).join("");
+
+      const bodyHTML = `
+        <div class="form-group">
+          <label>Titre officiel du rapport</label>
+          <input type="text" id="newRepTitle" class="field" placeholder="Ex: Rapport d'infraction routière" required>
+        </div>
+        <div class="form-group">
+          <label>Citoyen impliqué</label>
+          <select id="newRepCitizen" class="field">${citizensOptions}</select>
+        </div>
+        <div class="form-group">
+          <label>Contenu et procès verbal</label>
+          <textarea id="newRepContent" class="field" style="min-height:120px;" placeholder="Rédiger votre rapport détaillé ici..." required></textarea>
+        </div>
+        <button class="primary" type="submit" style="width:100%; margin-top:10px;">Consigner le rapport</button>
+      `;
+
+      openModal("Déposer un rapport officiel", "Enregistrer un compte rendu d'intervention.", "PROCÉDURE OPÉRATIONNELLE", bodyHTML);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        const citId = $("newRepCitizen").value;
+        const cit = db.citizens.find(c => c.id === citId);
+
+        const newRep = {
+          id: "REP-" + String(db.reports.length + 1).padStart(2, '0'),
+          title: $("newRepTitle").value.trim(),
+          date: new Date().toLocaleDateString("fr-FR"),
+          citizenId: cit.id,
+          citizenName: `${cit.lastname} ${cit.firstname}`,
+          author: db.config.agentName,
+          content: $("newRepContent").value.trim()
+        };
+
+        db.reports.unshift(newRep);
+        setStore("reports", db.reports);
+        modal.classList.add("hidden");
+        notify("Rapport officiellement enregistré dans le registre national !");
+        renderDynamicPage();
+      };
+    }
+
+    // --- FORMULAIRE CRÉATION ENQUÊTE (DOSSIER) ---
+    function openCreateCaseModal() {
+      const citizensOptions = db.citizens.map(c => `<option value="${c.id}">${c.lastname.toUpperCase()} ${c.firstname}</option>`).join("");
+
+      const bodyHTML = `
+        <div class="form-group">
+          <label>Nom de l'enquête judiciaire</label>
+          <input type="text" id="newCaseTitle" class="field" placeholder="Ex: Braquages supérettes Blaine County" required>
+        </div>
+        <div class="form-group">
+          <label>Suspect principal identifié</label>
+          <select id="newCaseCitizen" class="field">${citizensOptions}</select>
+        </div>
+        <div class="form-group">
+          <label>Description / Résumé des charges</label>
+          <textarea id="newCaseDesc" class="field" style="min-height:80px;" placeholder="Éléments d'enquête en votre possession..." required></textarea>
+        </div>
+        <button class="primary" type="submit" style="width:100%; margin-top:10px;">Ouvrir l'instruction</button>
+      `;
+
+      openModal("Ouvrir une enquête criminelle", "Ajouter un dossier d'instruction criminel.", "INSTRUCTION JUDICIAIRE", bodyHTML);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+        const citId = $("newCaseCitizen").value;
+        const cit = db.citizens.find(c => c.id === citId);
+
+        const newCase = {
+          id: "DOS-" + String(db.cases.length + 1).padStart(2, '0'),
+          title: $("newCaseTitle").value.trim(),
+          status: "Actif",
+          desc: $("newCaseDesc").value.trim(),
+          citizenId: cit.id,
+          citizenName: `${cit.lastname} ${cit.firstname}`
+        };
+
+        db.cases.unshift(newCase);
+        setStore("cases", db.cases);
+        modal.classList.add("hidden");
+        notify("Dossier d'instruction ouvert !");
+        renderDynamicPage();
+      };
+    }
+
+    // ==========================================
+    // ETAPE 6 : RECHERCHE GLOBALE ET MODAL CONFIGURATION ADMINISTRATIVE
+    // ==========================================
+
+    const configBtn = $("configBtn");
+
+    // Ouvrir la modal d'administration
+    configBtn.onclick = () => {
+      const servicesChecks = db.services.map(s => `
+        <label>
+          <input type="checkbox" class="srv-check" data-code="${s.code}" ${s.enabled ? "checked" : ""}>
+          <i style="background:${s.color};">${s.icon}</i>
+          ${s.name}
+        </label>
+      `).join("");
+
+      const bodyHTML = `
+        <div class="form-group">
+          <label>Nom de l'organisation d'État</label>
+          <input type="text" id="adminOrgName" class="field" value="${db.config.orgName}" required>
+        </div>
+        <div class="form-group">
+          <label>Nom d'affichage de l'agent actif</label>
+          <input type="text" id="adminAgentName" class="field" value="${db.config.agentName}" required>
+        </div>
+        <div class="form-group">
+          <label>Services habilités sur le terminal</label>
+          <div class="check-list">
+            ${servicesChecks}
+          </div>
+        </div>
+        <button class="primary" type="submit" style="width:100%; margin-top:15px;">Enregistrer la configuration</button>
+      `;
+
+      openModal("Configurer votre MDT", "Ajuster l'identité nationale du terminal opérationnel.", "ADMINISTRATION SYSTEME", bodyHTML);
+
+      $("modalForm").onsubmit = (e) => {
+        e.preventDefault();
+
+        // Sauvegarde de l'organisation
+        db.config.orgName = $("adminOrgName").value.trim();
+        db.config.agentName = $("adminAgentName").value.trim();
+        setStore("config", db.config);
+
+        // Sauvegarde de l'état des services
+        document.querySelectorAll(".srv-check").forEach(cb => {
+          const s = db.services.find(x => x.code === cb.dataset.code);
+          if (s) s.enabled = cb.checked;
+        });
+        setStore("services", db.services);
+
+        // Actualisation directe
+        $("orgSmall").textContent = db.config.orgName;
+        $("agentNameDisplay").textContent = db.config.agentName;
+        $("agentAvatar").textContent = db.config.agentName.split(" ").map(n => n[0]).join("").toUpperCase();
+
+        buildServices();
+        selectService(activeService.code);
+
+        modal.classList.add("hidden");
+        notify("Configuration enregistrée et appliquée.");
+        renderDynamicPage();
+      };
+    };
+
+    // --- RECHERCHE GLOBALE POPUP (CTRL K / RECHERCHE MULTI-MODULE) ---
+    const searchOverlay = $("globalSearchOverlay");
+    const globalSearchInput = $("globalSearchInput");
+    const globalSearchResults = $("globalSearchResults");
+
+    // Écoute de l'événement CTRL K
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        searchOverlay.classList.remove("hidden");
+        globalSearchInput.focus();
+        triggerGlobalSearch();
+      }
+      if (e.key === "Escape") {
+        searchOverlay.classList.add("hidden");
+      }
+    });
+
+    // Également branché sur la barre de recherche rapide haut de page
+    $("search").onfocus = (e) => {
+      e.preventDefault();
+      searchOverlay.classList.remove("hidden");
+      globalSearchInput.focus();
+      triggerGlobalSearch();
+    };
+
+    globalSearchInput.oninput = () => {
+      triggerGlobalSearch();
+    };
+
+    function triggerGlobalSearch() {
+      const q = globalSearchInput.value.toLowerCase().trim();
+
+      const matchedCitizens = db.citizens.filter(c => `${c.firstname} ${c.lastname} ${c.id}`.toLowerCase().includes(q));
+      const matchedVehicles = db.vehicles.filter(v => `${v.plate} ${v.model} ${v.owner}`.toLowerCase().includes(q));
+      const matchedReports = db.reports.filter(r => `${r.title} ${r.citizenName} ${r.author}`.toLowerCase().includes(q));
+
+      let html = "";
+
+      if (matchedCitizens.length > 0) {
+        html += `<div class="result-group-title">Citoyens (${matchedCitizens.length})</div>`;
+        html += matchedCitizens.map(c => `
+          <div class="result-item" onclick="openGlobalSearchResult('citizen', '${c.id}')">
+            <div class="result-item-info">
+              <strong>${c.lastname.toUpperCase()} ${c.firstname}</strong>
+              <small>ID Civil: ${c.id} • Tel: ${c.phone || "Aucun"}</small>
+            </div>
+            ${c.wanted ? '<span class="badge urgent">Recherché</span>' : '<span class="badge">R.A.S.</span>'}
+          </div>
+        `).join("");
+      }
+
+      if (matchedVehicles.length > 0) {
+        html += `<div class="result-group-title">Véhicules (${matchedVehicles.length})</div>`;
+        html += matchedVehicles.map(v => `
+          <div class="result-item" onclick="openGlobalSearchResult('vehicle', '${v.plate}')">
+            <div class="result-item-info">
+              <strong>${v.model} — <span style="font-family:monospace; color:var(--accent-gold);">${v.plate}</span></strong>
+              <small>Propriétaire: ${v.owner} • Couleur: ${v.color}</small>
+            </div>
+            ${v.wanted ? '<span class="badge urgent">Signalé Volé</span>' : '<span class="badge done">En règle</span>'}
+          </div>
+        `).join("");
+      }
+
+      if (matchedReports.length > 0) {
+        html += `<div class="result-group-title">Rapports d'interventions (${matchedReports.length})</div>`;
+        html += matchedReports.map(r => `
+          <div class="result-item" onclick="openGlobalSearchResult('report', '${r.id}')">
+            <div class="result-item-info">
+              <strong>${r.title}</strong>
+              <small>Rédacteur: ${r.author} • Date: ${r.date}</small>
+            </div>
+            <span class="badge">Numérisé</span>
+          </div>
+        `).join("");
+      }
+
+      if (html === "") {
+        html = `<div style="padding:30px; text-align:center; color:var(--text-muted); font-size:11px;">Aucun citoyen, véhicule ou rapport ne correspond à votre saisie.</div>`;
+      }
+
+      globalSearchResults.innerHTML = html;
+    }
+
+    // Ouvrir un résultat depuis l'overlay global
+    function openGlobalSearchResult(type, id) {
+      searchOverlay.classList.add("hidden");
+      if (type === "citizen") {
+        navigateToPage("Citoyens");
+        viewCitizenDetails(id);
+      } else if (type === "vehicle") {
+        navigateToPage("Véhicules");
+        viewVehicleDetails(id);
+      } else if (type === "report") {
+        navigateToPage("Rapports");
+        viewReportDetails(id);
+      }
+    }
+  </script>
+</body>
+</html>

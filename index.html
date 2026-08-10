@@ -1371,6 +1371,46 @@
       { id: "DOS-01", title: "Enquête Sultan Noire", status: "Actif", desc: "Enquête judiciaire ouverte concernant le réseau de vol et de recel de Sultan Classic noires sévissant dans la région.", citizenId: "FR-02", citizenName: "Sarah Bernard" }
     ];
 
+    const initialPatrols = [
+      { id: "PAT-01", name: "Écho 21", service: "GN", leader: "Noé Natter", members: "2 agents", vehicle: "Alpine A110", status: "En patrouille" },
+      { id: "PAT-02", name: "Victor 03", service: "PN", leader: "Léa Garnier", members: "3 agents", vehicle: "Peugeot 5008", status: "Disponible" },
+      { id: "PAT-03", name: "VSAV 12", service: "SP", leader: "Arthur Leroy", members: "3 secouristes", vehicle: "VSAV", status: "En intervention" },
+      { id: "PAT-04", name: "SMUR 02", service: "CH", leader: "Dr Chloé Robert", members: "3 soignants", vehicle: "UMH", status: "Disponible" }
+    ];
+
+    const initialMedicalRecords = [
+      { id: "PAT-FR-01", citizenId: "FR-01", patient: "Lucas Martin", blood: "O+", allergies: "Aucune connue", condition: "Stable", updated: "09/08/2026" },
+      { id: "PAT-FR-02", citizenId: "FR-02", patient: "Sarah Bernard", blood: "A−", allergies: "Pénicilline", condition: "Suivi requis", updated: "08/08/2026" }
+    ];
+
+    const initialWeaponPermits = [
+      { id: "PPA-001", citizenId: "FR-01", citizen: "Lucas Martin", doctor: "Dr Chloé Robert", medicalStatus: "Validé", policeStatus: "À contrôler", status: "Transmission FDO" },
+      { id: "PPA-002", citizenId: "FR-03", citizen: "Arthur Leroy", doctor: "Dr Chloé Robert", medicalStatus: "En attente", policeStatus: "Non transmis", status: "Examen médical" }
+    ];
+
+    const initialDeaths = [
+      { id: "DEC-2026-004", citizen: "Jean Morel", date: "07/08/2026", doctor: "Dr Chloé Robert", cause: "Traumatisme majeur", status: "Transmis à l'état civil" }
+    ];
+
+    const initialCivilDocuments = [
+      { id: "ETAT-001", citizen: "Lucas Martin", type: "Carte nationale d'identité", number: "CNI-FR-240194", status: "Valide", issued: "12/04/2024" },
+      { id: "ETAT-002", citizen: "Sarah Bernard", type: "Permis de conduire", number: "PC-FR-991202", status: "Suspendu", issued: "22/06/2021" }
+    ];
+
+    const initialJusticeCases = [
+      { id: "TRIB-026", citizen: "Sarah Bernard", source: "DOS-01", reason: "Recel et complicité", hearing: "À programmer", status: "Saisi par les FDO" }
+    ];
+
+    const initialPrisonTransfers = [
+      { id: "ECR-011", citizen: "Marc Delcourt", caseId: "TRIB-019", sentence: "18 mois", prison: "Centre pénitentiaire de Bolingbroke", status: "Écrou effectué" }
+    ];
+
+    const initialStaff = [
+      { id: "AG-001", name: "Noé Natter", service: "GN", grade: "Administrateur", permissions: "Direction complète", status: "Actif" },
+      { id: "AG-002", name: "Léa Garnier", service: "PN", grade: "Commandant", permissions: "Commandement", status: "Actif" },
+      { id: "AG-003", name: "Dr Chloé Robert", service: "CH", grade: "Directrice médicale", permissions: "Direction complète", status: "Actif" }
+    ];
+
     const initialConfig = {
       orgName: "RÉPUBLIQUE FRANÇAISE",
       agentName: "Noé Natter",
@@ -1400,6 +1440,14 @@
       interventions: getStore("interventions", initialInterventions),
       reports: getStore("reports", initialReports),
       cases: getStore("cases", initialCases),
+      patrols: getStore("patrols", initialPatrols),
+      medicalRecords: getStore("medicalRecords", initialMedicalRecords),
+      weaponPermits: getStore("weaponPermits", initialWeaponPermits),
+      deaths: getStore("deaths", initialDeaths),
+      civilDocuments: getStore("civilDocuments", initialCivilDocuments),
+      justiceCases: getStore("justiceCases", initialJusticeCases),
+      prisonTransfers: getStore("prisonTransfers", initialPrisonTransfers),
+      staff: getStore("staff", initialStaff),
       config: getStore("config", initialConfig)
     };
 
@@ -1407,14 +1455,17 @@
     // ETAPE 3 : SYSTEME D'AUTHENTIFICATION ET DE ROUTAGE
     // ==========================================
 
-    const pages = [
-      { name: "Tableau de bord", icon: "⌂" },
-      { name: "Citoyens", icon: "♙" },
-      { name: "Véhicules", icon: "▣" },
-      { name: "Interventions", icon: "⚡" },
-      { name: "Rapports", icon: "▤" },
-      { name: "Dossiers", icon: "◇" }
-    ];
+    const pagesByService = {
+      GN: [["Tableau de bord","⌂"],["Citoyens","♙"],["Véhicules","▣"],["Patrouilles","◉"],["Interventions","⚡"],["Rapports","▤"],["Dossiers","◇"],["Port d'armes","⌖"],["Personnel","♜"]],
+      PN: [["Tableau de bord","⌂"],["Citoyens","♙"],["Véhicules","▣"],["Patrouilles","◉"],["Interventions","⚡"],["Rapports","▤"],["Dossiers","◇"],["Port d'armes","⌖"],["Personnel","♜"]],
+      SP: [["Tableau de bord","⌂"],["Interventions","⚡"],["Patrouilles","◉"],["Citoyens","♙"],["Rapports","▤"],["Personnel","♜"]],
+      CH: [["Tableau de bord","⌂"],["Patients","✚"],["Port d'armes","⌖"],["Interventions","⚡"],["Patrouilles","◉"],["Décès","†"],["Rapports","▤"],["Personnel","♜"]],
+      GVT: [["Tableau de bord","⌂"],["État civil","▦"],["Citoyens","♙"],["Justice","⚖"],["Prison","▥"],["Documents","▤"],["Personnel","♜"]]
+    };
+
+    function currentPages() {
+      return (pagesByService[activeService.code] || pagesByService.GN).map(([name, icon]) => ({ name, icon }));
+    }
 
     let activePage = "Tableau de bord";
     let activeService = db.services[0];
@@ -1448,7 +1499,7 @@
     // Construit le menu de navigation
     function renderNav() {
       const activeAppeals = db.interventions.filter(i => i.status === "En cours").length;
-      $("nav").innerHTML = pages.map(p => `
+      $("nav").innerHTML = currentPages().map(p => `
         <button class="${p.name === activePage ? 'active' : ''}" onclick="navigateToPage('${p.name}')">
           <span>${p.icon}</span>${p.name}
           ${p.name === "Interventions" && activeAppeals > 0 ? `<b>${activeAppeals}</b>` : ""}
@@ -1467,7 +1518,16 @@
         "Véhicules": "Registre national des immatriculations et avis de recherche actifs.",
         "Interventions": "Gestion des appels d'urgence et répartition des patrouilles.",
         "Rapports": "Rédaction et consignation de rapports officiels d'intervention.",
-        "Dossiers": "Dossiers d'enquête criminelle et mandats d'arrêt émis."
+        "Dossiers": "Dossiers d'enquête criminelle et mandats d'arrêt émis.",
+        "Patrouilles": "Création, composition et suivi opérationnel des unités engagées.",
+        "Patients": "Dossiers patients, antécédents et suivi médical confidentiel.",
+        "Port d'armes": "Circuit médico-administratif des demandes de permis de port d'armes.",
+        "Décès": "Déclarations médicales de décès et transmission à l'état civil.",
+        "État civil": "Recensement national et délivrance des documents officiels.",
+        "Justice": "Affaires transmises par les forces de l'ordre et audiences du tribunal.",
+        "Prison": "Clôture judiciaire, condamnations et transferts pénitentiaires.",
+        "Documents": "Création et suivi des papiers officiels des citoyens.",
+        "Personnel": "Gestion interne du service, grades et habilitations."
       };
 
       $("pageDescription").textContent = descriptions[pageName] || "";
@@ -1543,7 +1603,7 @@
     $("serviceSelect").onchange = (e) => {
       selectService(e.target.value);
       notify(`Service actif : ${activeService.name}`);
-      navigateToPage(activePage);
+      navigateToPage("Tableau de bord");
     };
 
     // Initialisation au chargement
@@ -1909,6 +1969,139 @@
           </div>
         `;
       }
+
+      else if (activePage === "Patrouilles") {
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('patrol')">＋ Créer une patrouille</button>`;
+        const patrols = db.patrols.filter(p => p.service === activeService.code);
+        content.innerHTML = premiumRegister(
+          "UNITÉS OPÉRATIONNELLES", "Patrouilles du service",
+          ["Indicatif", "Chef d'unité", "Composition", "Véhicule", "Statut"],
+          patrols.map(p => [p.name, p.leader, p.members, p.vehicle, p.status]),
+          "Aucune patrouille affectée à ce service."
+        );
+      }
+
+      else if (activePage === "Patients") {
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('patient')">＋ Créer un dossier patient</button>`;
+        content.innerHTML = premiumRegister(
+          "SECRET MÉDICAL", "Dossiers patients",
+          ["Dossier", "Patient", "Groupe sanguin", "Allergies", "État"],
+          db.medicalRecords.map(r => [r.id, r.patient, r.blood, r.allergies, r.condition]),
+          "Aucun dossier patient."
+        ) + workflowNotice("Accès réservé au personnel hospitalier habilité", "Les forces de l'ordre ne voient pas le contenu médical. Seuls les certificats explicitement transmis leur sont accessibles.");
+      }
+
+      else if (activePage === "Port d'armes") {
+        const isMedical = activeService.code === "CH";
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('weapon')">＋ Nouvelle demande</button>`;
+        content.innerHTML = workflowNotice(
+          "Circuit interservices sécurisé",
+          isMedical
+            ? "Le médecin évalue l'aptitude puis transmet uniquement sa décision aux forces de l'ordre."
+            : "Les forces de l'ordre ne reçoivent le dossier qu'après validation médicale."
+        ) + premiumRegister(
+          "AUTORISATIONS RÉGLEMENTÉES", "Demandes de permis de port d'armes",
+          ["Référence", "Demandeur", "Avis médical", "Contrôle FDO", "Étape"],
+          db.weaponPermits.map(p => [p.id, p.citizen, p.medicalStatus, p.policeStatus, p.status]),
+          "Aucune demande en cours."
+        );
+      }
+
+      else if (activePage === "Décès") {
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('death')">＋ Déclarer un décès</button>`;
+        content.innerHTML = premiumRegister(
+          "REGISTRE MÉDICO-LÉGAL", "Déclarations de décès",
+          ["Référence", "Personne", "Date", "Médecin déclarant", "Transmission"],
+          db.deaths.map(d => [d.id, d.citizen, d.date, d.doctor, d.status]),
+          "Aucune déclaration de décès."
+        );
+      }
+
+      else if (activePage === "État civil" || activePage === "Documents") {
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('document')">＋ Créer un document</button>`;
+        content.innerHTML = premiumRegister(
+          "REGISTRE NATIONAL", activePage === "État civil" ? "Recensement et état civil" : "Documents officiels",
+          ["Référence", "Citoyen", "Type de document", "Numéro", "Statut"],
+          db.civilDocuments.map(d => [d.id, d.citizen, d.type, d.number, d.status]),
+          "Aucun document officiel."
+        );
+      }
+
+      else if (activePage === "Justice") {
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('justice')">＋ Ouvrir une procédure</button>`;
+        content.innerHTML = workflowNotice(
+          "Passerelle forces de l'ordre → tribunal",
+          "Seuls les dossiers signalés comme nécessitant une audience apparaissent ici. Le tribunal peut instruire, clôturer ou préparer un transfert pénitentiaire."
+        ) + premiumRegister(
+          "TRIBUNAL", "Affaires judiciaires transmises",
+          ["Affaire", "Prévenu", "Dossier source", "Motif", "Statut"],
+          db.justiceCases.map(j => [j.id, j.citizen, j.source, j.reason, j.status]),
+          "Aucune affaire transmise au tribunal."
+        );
+      }
+
+      else if (activePage === "Prison") {
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('prison')">＋ Préparer un écrou</button>`;
+        content.innerHTML = premiumRegister(
+          "ADMINISTRATION PÉNITENTIAIRE", "Condamnations et transferts",
+          ["Écrou", "Détenu", "Affaire", "Peine", "Établissement"],
+          db.prisonTransfers.map(p => [p.id, p.citizen, p.caseId, p.sentence, p.prison]),
+          "Aucun transfert pénitentiaire."
+        );
+      }
+
+      else if (activePage === "Personnel") {
+        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('staff')">＋ Ajouter un membre</button>`;
+        const staff = db.staff.filter(s => s.service === activeService.code);
+        content.innerHTML = workflowNotice(
+          "Administration cloisonnée",
+          `La direction ${activeService.name} gère uniquement ses propres membres, grades et habilitations. Aucun accès aux personnels des autres institutions.`
+        ) + premiumRegister(
+          "DIRECTION DU SERVICE", "Personnel et habilitations",
+          ["Matricule", "Nom", "Grade", "Permissions", "Statut"],
+          staff.map(s => [s.id, s.name, s.grade, s.permissions, s.status]),
+          "Aucun membre enregistré dans ce service."
+        );
+      }
+    }
+
+    function premiumRegister(eyebrow, title, headers, rows, emptyMessage) {
+      return `
+        <section class="panel">
+          <div class="panel-head">
+            <div><span class="eyebrow">${eyebrow}</span><h2>${title}</h2></div>
+            <span class="badge done">${rows.length} ENREGISTREMENT(S)</span>
+          </div>
+          <div class="table">
+            <div class="row head">${headers.map(h => `<span>${h}</span>`).join("")}</div>
+            <div>
+              ${rows.map((row, index) => `
+                <div class="row clickable" onclick="notify('Ouverture de la fiche n°' + ${index + 1})">
+                  ${row.map((cell, cellIndex) => `<span class="${cellIndex === 0 ? 'good' : ''}">${cell}</span>`).join("")}
+                </div>
+              `).join("")}
+              ${rows.length === 0 ? `<div style="padding:28px;text-align:center;color:var(--text-muted);">${emptyMessage}</div>` : ""}
+            </div>
+          </div>
+        </section>`;
+    }
+
+    function workflowNotice(title, text) {
+      return `
+        <div class="panel" style="border-left:3px solid var(--accent-gold);background:linear-gradient(90deg,rgba(210,181,125,.08),var(--bg-panel));">
+          <span class="eyebrow">FLUX INSTITUTIONNEL</span>
+          <h2 style="margin:6px 0 8px;font:400 18px Georgia,serif;">${title}</h2>
+          <p style="color:var(--text-muted);font-size:11px;line-height:1.7;">${text}</p>
+        </div>`;
+    }
+
+    function createSimpleRecord(type) {
+      const labels = {
+        patrol: "patrouille", patient: "dossier patient", weapon: "demande de port d'armes",
+        death: "déclaration de décès", document: "document officiel",
+        justice: "procédure judiciaire", prison: "dossier d'écrou", staff: "membre du personnel"
+      };
+      notify(`Module de création « ${labels[type] || type} » prêt pour la connexion Firebase.`);
     }
 
     // Gestionnaires de filtres

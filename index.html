@@ -68,6 +68,8 @@
       display: none !important;
     }
 
+    .auth-tabs{display:flex;gap:6px;margin:18px 0}.auth-tabs button{flex:1;padding:9px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--text-muted);cursor:pointer}.auth-tabs button.active{background:rgba(99,137,229,.14);border-color:var(--accent-blue);color:#fff}.sync-pill{display:inline-flex;gap:6px;align-items:center;font-size:9px;color:var(--status-success)}.sync-pill.offline{color:var(--status-warning)}
+
     /* ==========================================
        ECRAN DE CONNEXION (LOGIN)
        ========================================== */
@@ -1192,27 +1194,38 @@
         <h1>Portail des services publics</h1>
         <p class="subtitle">Connectez-vous à votre espace opérationnel unifié.</p>
 
+        <div class="auth-tabs">
+          <button id="loginTab" class="active" type="button">Se connecter</button>
+          <button id="createOrgTab" type="button">Créer un serveur</button>
+        </div>
         <form id="loginForm">
           <div class="form-group">
-            <label>Matricule ou identifiant</label>
-            <input id="loginBadge" class="field" value="GND-0742" required autocomplete="username">
+            <label>Adresse professionnelle</label>
+            <input id="loginEmail" type="email" class="field" placeholder="agent@votre-serveur.fr" required autocomplete="username">
           </div>
           <div class="form-group">
             <label>Mot de passe de sécurité</label>
-            <input id="loginPassword" type="password" class="field" value="demo2026" required autocomplete="current-password">
-          </div>
-          <div class="form-group">
-            <label>Service actif</label>
-            <select id="loginService" class="field"></select>
+            <input id="loginPassword" type="password" class="field" placeholder="8 caractères minimum" required autocomplete="current-password">
           </div>
           <button class="primary" type="submit">Accéder au MDT →</button>
-          <p class="demo">Version de démonstration — identifiants préremplis</p>
+          <button id="resetPasswordBtn" class="link" type="button" style="margin-top:12px">Mot de passe oublié</button>
+          <p class="demo">Compte Firebase sécurisé — aucune donnée n'est stockée dans le code.</p>
+        </form>
+        <form id="createOrgForm" class="hidden">
+          <div class="form-group"><label>Nom de votre serveur RP</label><input id="newOrgName" class="field" required placeholder="Ex. Horizon RP"></div>
+          <div class="form-group"><label>Votre nom RP</label><input id="newOwnerName" class="field" required placeholder="Prénom Nom"></div>
+          <div class="form-group"><label>Matricule</label><input id="newOwnerBadge" class="field" required placeholder="ADM-0001"></div>
+          <div class="form-group"><label>Institution principale</label><select id="newOwnerService" class="field"><option value="GN">Gendarmerie</option><option value="PN">Police nationale</option><option value="SP">Sapeurs-pompiers</option><option value="CH">Hôpital / SAMU</option><option value="GVT">Gouvernement / Justice</option></select></div>
+          <div class="form-group"><label>Adresse e-mail administrateur</label><input id="newOwnerEmail" type="email" class="field" required></div>
+          <div class="form-group"><label>Mot de passe administrateur</label><input id="newOwnerPassword" type="password" minlength="8" class="field" required></div>
+          <button class="primary" type="submit">Créer mon espace sécurisé →</button>
+          <p class="demo">Chaque serveur possède une organisation et des données totalement séparées.</p>
         </form>
       </div>
 
       <div class="login-foot">
-        <span class="online">● Système opérationnel</span>
-        <span>v2.0.0 • France RP</span>
+        <span id="syncStatus" class="online">● Firebase prêt</span>
+        <span>v3.0.0 • Cloud Firestore</span>
       </div>
     </div>
 
@@ -1331,6 +1344,9 @@
   <!-- ==========================================
        LOGIQUE APPLICATIVE SÉCURISÉE (JS)
        ========================================== -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script>
     // ==========================================
     // INITIALISATION DE LA BASE DE DONNÉES LOCALSTORAGE
@@ -1445,7 +1461,29 @@
       agentRole: "Administrateur"
     };
 
-    // Chargeur de stockage localisé
+    const firebaseConfig = {
+      apiKey: "AIzaSyC33Dk6arN05Od3Hz7--XxIp0JTL-zCkVE",
+      authDomain: "mdt-fr.firebaseapp.com",
+      projectId: "mdt-fr",
+      storageBucket: "mdt-fr.firebasestorage.app",
+      messagingSenderId: "761306156349",
+      appId: "1:761306156349:web:476a1661689c1f67898954",
+      measurementId: "G-CZ2PXNJJ6N"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const firebaseAuth = firebase.auth();
+    const firestore = firebase.firestore();
+    firestore.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+    const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp;
+    let currentFirebaseUser = null;
+    let currentUserProfile = null;
+    let currentOrgId = null;
+    let creatingOrganization = false;
+    let liveUnsubscribers = [];
+    let remoteReady = false;
+    const remoteCollections = ["citizens","vehicles","interventions","reports","cases","patrols","medicalRecords","weaponPermits","deaths","civilDocuments","justiceCases","prisonTransfers","staff","emergencyCalls","transmissions","tasks","audit"];
+
+    // Cache local de secours : Firestore reste la source de vérité.
     function getStore(key, fallback) {
       const data = localStorage.getItem("mdt_" + key);
       if (!data) {
@@ -1457,6 +1495,50 @@
 
     function setStore(key, data) {
       localStorage.setItem("mdt_" + key, JSON.stringify(data));
+      if (remoteReady && currentOrgId && remoteCollections.includes(key)) syncCollection(key, data).catch(handleFirebaseError);
+    }
+
+    function recordId(key, item, index) {
+      return String(item.id || item.plate || item.uid || `${key}-${index}`).replace(/\//g,"-");
+    }
+
+    async function syncCollection(key, data) {
+      if (!canWriteCollection(key)) throw new Error("Votre rôle ne permet pas de modifier ce registre.");
+      const ref = firestore.collection("organizations").doc(currentOrgId).collection(key);
+      const existing = await ref.get();
+      const wanted = new Set(data.map((item,index)=>recordId(key,item,index)));
+      let batch = firestore.batch(); let operations = 0;
+      data.forEach((item,index)=>{ const id=recordId(key,item,index); batch.set(ref.doc(id), {...item, orgId:currentOrgId, updatedAt:serverTimestamp(), updatedBy:currentFirebaseUser.uid},{merge:true}); operations++; });
+      existing.docs.forEach(doc=>{ if(!wanted.has(doc.id)){batch.delete(doc.ref);operations++;} });
+      if(operations) await batch.commit();
+      setSyncState(true,"Synchronisé");
+    }
+
+    function canWriteCollection(key) {
+      if (!currentUserProfile || currentUserProfile.active === false) return false;
+      const role=currentUserProfile.role, service=currentUserProfile.service;
+      if (["owner","admin"].includes(role)) return true;
+      if (key === "medicalRecords") return service === "CH" && ["direction","doctor","medic"].includes(role);
+      if (["justiceCases","prisonTransfers"].includes(key)) return service === "GVT" && ["direction","magistrate","greffe"].includes(role);
+      if (key === "civilDocuments") return service === "GVT";
+      if (key === "staff") return role === "direction";
+      return ["direction","supervisor","opj","agent","doctor","medic","dispatcher"].includes(role);
+    }
+
+    function setSyncState(ok,label) {
+      const node=document.getElementById("syncStatus"); if(!node) return;
+      node.textContent=(ok?"● ":"◌ ")+label; node.classList.toggle("offline",!ok);
+    }
+
+    function handleFirebaseError(error) {
+      console.error(error); setSyncState(false,"Synchronisation interrompue");
+      notify(firebaseMessage(error));
+    }
+
+    function firebaseMessage(error) {
+      const code=error?.code||"";
+      const messages={"auth/invalid-credential":"Identifiants incorrects.","auth/email-already-in-use":"Cette adresse est déjà utilisée.","auth/weak-password":"Le mot de passe doit contenir au moins 8 caractères.","auth/too-many-requests":"Trop de tentatives. Réessayez plus tard.","permission-denied":"Accès refusé par les règles de sécurité.","auth/user-not-found":"Compte introuvable."};
+      return messages[code] || error?.message || "Une erreur Firebase est survenue.";
     }
 
     // Chargement de l'ensemble de la BD au démarrage
@@ -1495,7 +1577,9 @@
     };
 
     function currentPages() {
-      return (pagesByService[activeService.code] || pagesByService.GN).map(([name, icon]) => ({ name, icon }));
+      return (pagesByService[activeService.code] || pagesByService.GN)
+        .filter(([name]) => name !== "Audit & accès" || ["owner","admin","direction"].includes(currentUserProfile?.role))
+        .map(([name, icon]) => ({ name, icon }));
     }
 
     let activePage = "Tableau de bord";
@@ -1504,8 +1588,10 @@
 
     // Initialise les sélecteurs de services (Login et App)
     function buildServices() {
-      const selectHTML = db.services.filter(s => s.enabled).map(s => `<option value="${s.code}">${s.name}</option>`).join("");
-      $("loginService").innerHTML = selectHTML;
+      const allowed = currentUserProfile && !["owner","admin"].includes(currentUserProfile.role)
+        ? db.services.filter(s => s.code === currentUserProfile.service && s.enabled)
+        : db.services.filter(s => s.enabled);
+      const selectHTML = allowed.map(s => `<option value="${s.code}">${s.name}</option>`).join("");
       $("serviceSelect").innerHTML = selectHTML;
 
       // Service logos en bas à droite de l'art de login
@@ -1594,41 +1680,91 @@
       }, 2500);
     }
 
-    // Formulaire de connexion
-    $("loginForm").onsubmit = (e) => {
+    function applyProfile(profile, organization) {
+      db.config.agentName=profile.name; db.config.agentBadge=profile.badge; db.config.agentRole=roleLabel(profile.role); db.config.orgName=organization.name;
+      $("orgSmall").textContent=organization.name.toUpperCase();
+      $("agentNameDisplay").textContent=profile.name;
+      $("agentRoleDisplay").textContent=`${roleLabel(profile.role)} • ${profile.badge}`;
+      $("agentAvatar").textContent=profile.name.split(" ").map(n=>n[0]).join("").toUpperCase().slice(0,2);
+      buildServices(); selectService(profile.service || "GN");
+    }
+
+    function roleLabel(role){return ({owner:"Propriétaire",admin:"Administrateur",direction:"Direction",supervisor:"Superviseur",opj:"OPJ",agent:"Agent",doctor:"Médecin",medic:"Soignant",dispatcher:"Opérateur",magistrate:"Magistrat",greffe:"Greffe"})[role]||role;}
+
+    async function loadSession(user) {
+      const userSnap=await firestore.collection("users").doc(user.uid).get();
+      if(!userSnap.exists) throw new Error("Profil MDT absent. Contactez l'administrateur de votre serveur.");
+      const profile=userSnap.data(); if(profile.active===false) throw new Error("Ce compte a été désactivé.");
+      const orgSnap=await firestore.collection("organizations").doc(profile.orgId).get();
+      if(!orgSnap.exists) throw new Error("Organisation introuvable.");
+      currentFirebaseUser=user; currentUserProfile=profile; currentOrgId=profile.orgId;
+      applyProfile(profile,orgSnap.data()); subscribeToOrganization();
+      $("login").classList.add("hidden"); $("application").classList.remove("hidden"); navigateToPage("Tableau de bord");
+      setSyncState(true,"Connecté au cloud");
+    }
+
+    function subscribeToOrganization() {
+      liveUnsubscribers.forEach(fn=>fn()); liveUnsubscribers=[]; remoteReady=false;
+      remoteCollections.filter(canReadCollection).forEach(key=>{
+        let query=firestore.collection("organizations").doc(currentOrgId).collection(key);
+        if(key==="staff" && !["owner","admin"].includes(currentUserProfile.role)) query=query.where("service","==",currentUserProfile.service);
+        if(["reports","cases"].includes(key) && !["owner","admin"].includes(currentUserProfile.role)) query=query.where("service","==",currentUserProfile.service);
+        if(key==="transmissions" && !["owner","admin"].includes(currentUserProfile.role)) query=query.where("participants","array-contains",currentUserProfile.service);
+        const unsub=query.onSnapshot(snapshot=>{
+          if(!snapshot.empty){ db[key]=snapshot.docs.map(doc=>({__docId:doc.id,...doc.data()})); localStorage.setItem("mdt_"+key,JSON.stringify(db[key])); }
+          if(!$("application").classList.contains("hidden")) renderDynamicPage();
+          remoteReady=true; setSyncState(!snapshot.metadata.fromCache,snapshot.metadata.fromCache?"Mode hors-ligne":"Synchronisé");
+        },handleFirebaseError); liveUnsubscribers.push(unsub);
+      });
+    }
+
+    function canReadCollection(key){
+      const s=currentUserProfile.service,r=currentUserProfile.role;
+      if(["owner","admin"].includes(r)) return true;
+      if(key==="audit") return ["owner","admin","direction"].includes(r);
+      if(key==="medicalRecords") return s==="CH";
+      if(key==="deaths") return ["CH","GVT"].includes(s);
+      if(["justiceCases","prisonTransfers","civilDocuments"].includes(key)) return s==="GVT";
+      if(["vehicles","cases"].includes(key)) return ["GN","PN","GVT"].includes(s);
+      if(key==="weaponPermits") return ["CH","GN","PN","GVT"].includes(s);
+      return true;
+    }
+
+    async function seedOrganization(orgId, owner) {
+      const datasets={citizens:initialCitizens,vehicles:initialVehicles,interventions:initialInterventions,reports:initialReports,cases:initialCases,patrols:initialPatrols,medicalRecords:initialMedicalRecords,weaponPermits:initialWeaponPermits,deaths:initialDeaths,civilDocuments:initialCivilDocuments,justiceCases:initialJusticeCases,prisonTransfers:initialPrisonTransfers,staff:[{id:owner.badge,name:owner.name,service:owner.service,grade:"Administrateur fondateur",permissions:"Direction complète",status:"Actif",uid:owner.uid}],emergencyCalls:initialEmergencyCalls,transmissions:initialTransmissions,tasks:initialTasks,audit:initialAudit};
+      let batch=firestore.batch(); let count=0;
+      for(const [key,items] of Object.entries(datasets)) for(let i=0;i<items.length;i++){const item=items[i],id=recordId(key,item,i);const normalized={...item,orgId,createdAt:serverTimestamp(),createdBy:owner.uid};if(key==="transmissions")normalized.participants=transmissionParticipants(item);if(["reports","cases"].includes(key))normalized.service=item.service||owner.service;batch.set(firestore.collection("organizations").doc(orgId).collection(key).doc(id),normalized);if(++count===450){await batch.commit();batch=firestore.batch();count=0;}}
+      if(count) await batch.commit();
+    }
+
+    function transmissionParticipants(item){const government=["PARQUET","TRIBUNAL","PRÉFECTURE","ÉTAT CIVIL","PRISON","GVT"];const values=[item.from,item.to].map(v=>government.includes(v)?"GVT":v);return [...new Set(values)];}
+
+    $("loginTab").onclick=()=>{$("loginTab").classList.add("active");$("createOrgTab").classList.remove("active");$("loginForm").classList.remove("hidden");$("createOrgForm").classList.add("hidden");};
+    $("createOrgTab").onclick=()=>{$("createOrgTab").classList.add("active");$("loginTab").classList.remove("active");$("createOrgForm").classList.remove("hidden");$("loginForm").classList.add("hidden");};
+
+    // Connexion Firebase Auth
+    $("loginForm").onsubmit = async (e) => {
       e.preventDefault();
-
-      const badge = $("loginBadge").value.trim();
-      const config = db.config;
-
-      // Attribution d'un nom selon le badge de demo
-      if (badge === "GND-0742") {
-        config.agentName = "Noé Natter";
-        config.agentRole = "Administrateur";
-      } else {
-        config.agentName = badge;
-        config.agentRole = "Officier de Patrouille";
-      }
-      config.agentBadge = badge;
-      setStore("config", config);
-
-      // Met à jour le profil de l'agent en sidebar
-      $("agentNameDisplay").textContent = config.agentName;
-      $("agentRoleDisplay").textContent = `${config.agentRole} • ${config.agentBadge}`;
-      $("agentAvatar").textContent = config.agentName.split(" ").map(n => n[0]).join("").toUpperCase();
-
-      selectService($("loginService").value);
-
-      // Bascule d'écrans
-      $("login").classList.add("hidden");
-      $("application").classList.remove("hidden");
-
-      navigateToPage("Tableau de bord");
-      notify(`Connexion établie — Matricule ${badge}`);
+      try{setSyncState(false,"Connexion…");await firebaseAuth.signInWithEmailAndPassword($("loginEmail").value.trim(),$("loginPassword").value);}
+      catch(error){handleFirebaseError(error);}
     };
 
+    $("createOrgForm").onsubmit=async e=>{e.preventDefault();let credential;creatingOrganization=true;
+      try{
+        credential=await firebaseAuth.createUserWithEmailAndPassword($("newOwnerEmail").value.trim(),$("newOwnerPassword").value);
+        const uid=credential.user.uid, orgId="org_"+uid;
+        const profile={uid,orgId,name:$("newOwnerName").value.trim(),badge:$("newOwnerBadge").value.trim().toUpperCase(),service:$("newOwnerService").value,role:"owner",active:true,email:$("newOwnerEmail").value.trim().toLowerCase(),createdAt:serverTimestamp()};
+        await firestore.collection("organizations").doc(orgId).set({name:$("newOrgName").value.trim(),ownerUid:uid,plan:"Découverte",status:"active",createdAt:serverTimestamp(),limits:{users:25,storageMb:500}});
+        await firestore.collection("users").doc(uid).set(profile); await seedOrganization(orgId,profile); creatingOrganization=false; await loadSession(credential.user);
+        notify("Organisation créée. Bienvenue dans votre MDT !");
+      }catch(error){creatingOrganization=false;if(credential?.user) await credential.user.delete().catch(()=>{});handleFirebaseError(error);}
+    };
+
+    $("resetPasswordBtn").onclick=async()=>{const email=$("loginEmail").value.trim();if(!email)return notify("Saisissez d'abord votre adresse e-mail.");try{await firebaseAuth.sendPasswordResetEmail(email);notify("E-mail de réinitialisation envoyé.");}catch(error){handleFirebaseError(error);}};
+
     // Déconnexion
-    $("logout").onclick = () => {
+    $("logout").onclick = async () => {
+      liveUnsubscribers.forEach(fn=>fn()); liveUnsubscribers=[]; remoteReady=false; await firebaseAuth.signOut();
       $("application").classList.add("hidden");
       $("login").classList.remove("hidden");
       notify("Déconnexion sécurisée effectuée.");
@@ -1640,6 +1776,8 @@
       notify(`Service actif : ${activeService.name}`);
       navigateToPage("Tableau de bord");
     };
+
+    firebaseAuth.onAuthStateChanged(user=>{if(user && !currentFirebaseUser && !creatingOrganization)loadSession(user).catch(async error=>{handleFirebaseError(error);await firebaseAuth.signOut();});});
 
     // Initialisation au chargement
     buildServices();
@@ -2111,7 +2249,8 @@
       }
 
       else if (activePage === "Personnel") {
-        actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('staff')">＋ Ajouter un membre</button>`;
+        const canManage=["owner","admin","direction"].includes(currentUserProfile?.role);
+        actions.innerHTML = canManage ? `<button class="primary" onclick="openCreateStaffModal()">＋ Créer un compte</button>` : "";
         const staff = db.staff.filter(s => s.service === activeService.code);
         content.innerHTML = workflowNotice(
           "Administration cloisonnée",
@@ -2176,16 +2315,42 @@
         death: "déclaration de décès", document: "document officiel",
         justice: "procédure judiciaire", prison: "dossier d'écrou", staff: "membre du personnel"
       };
-      notify(`Module de création « ${labels[type] || type} » prêt pour la connexion Firebase.`);
+      const definitions={
+        patrol:[["name","Indicatif","Écho 21"],["leader","Chef d'unité","Nom du responsable"],["members","Composition","2 agents"],["vehicle","Véhicule","Peugeot 5008"]],
+        patient:[["patient","Patient","Prénom Nom"],["citizenId","Identifiant citoyen","FR-01"],["blood","Groupe sanguin","O+"],["allergies","Allergies","Aucune connue"],["condition","État clinique","Stable"]],
+        weapon:[["citizen","Demandeur","Prénom Nom"],["citizenId","Identifiant citoyen","FR-01"],["medicalStatus","État du certificat","À fournir"],["policeStatus","Enquête administrative","Non demandée"]],
+        death:[["citizen","Personne décédée","Prénom Nom"],["date","Date du décès","JJ/MM/AAAA"],["doctor","Auteur du certificat","Dr Prénom Nom"],["cause","Volet médical confidentiel","Cause / obstacle médico-légal"]],
+        document:[["citizen","Citoyen","Prénom Nom"],["type","Type de document","Acte de naissance"],["number","Numéro","DOC-2026-001"]],
+        justice:[["citizen","Personne concernée","Prénom Nom"],["source","Dossier source","DOS-01"],["reason","Objet de la saisine","Qualification et faits"],["hearing","Audience","À programmer"]],
+        prison:[["citizen","Personne écrouée","Prénom Nom"],["caseId","Décision judiciaire","TRIB-001"],["sentence","Peine","12 mois"],["prison","Établissement","Centre pénitentiaire"]]
+      };
+      const fields=definitions[type]; if(!fields)return notify("Ce module nécessite un droit d'administration.");
+      const body=fields.map(([id,label,placeholder])=>`<div class="form-group"><label>${label}</label><input id="simple_${id}" class="field" required placeholder="${placeholder}"></div>`).join("")+`<button class="primary" type="submit" style="width:100%">Enregistrer dans Firestore</button>`;
+      openModal(`Créer : ${labels[type]}`,"L'enregistrement sera immédiatement partagé avec les utilisateurs habilités.","NOUVEL ENREGISTREMENT",body);
+      $("modalForm").onsubmit=e=>{e.preventDefault();const values={};fields.forEach(([id])=>values[id]=$("simple_"+id).value.trim());const n=Date.now().toString().slice(-6);
+        const targets={
+          patrol:["patrols",{id:"PAT-"+n,...values,service:activeService.code,status:"Disponible"}],
+          patient:["medicalRecords",{id:"PAT-"+values.citizenId,...values,updated:new Date().toLocaleDateString("fr-FR")}],
+          weapon:["weaponPermits",{id:"SIA-"+n,...values,status:"Instruction préfecture / SIA"}],
+          death:["deaths",{id:"DEC-"+n,...values,status:"À transmettre à l'état civil"}],
+          document:["civilDocuments",{id:"ETAT-"+n,...values,status:"Valide",issued:new Date().toLocaleDateString("fr-FR")}],
+          justice:["justiceCases",{id:"TRIB-"+n,...values,status:"Saisi par le parquet"}],
+          prison:["prisonTransfers",{id:"ECR-"+n,...values,status:"Écrou préparé"}]
+        };
+        const [key,item]=targets[type];db[key].unshift(item);setStore(key,db[key]);addAudit("Création",item.id,"Autorisé",labels[type]);modal.classList.add("hidden");notify("Enregistrement créé et synchronisé.");renderDynamicPage();
+      };
     }
 
     function addAudit(action, object, result, reason) {
-      db.audit.unshift({
+      const entry={
         time:new Date().toLocaleTimeString("fr-FR"), actor:db.config.agentBadge,
-        service:activeService.code, action, object, result, reason
-      });
+        service:activeService.code, action, object, result, reason, orgId:currentOrgId,
+        uid:currentFirebaseUser?.uid || null, createdAt:serverTimestamp()
+      };
+      db.audit.unshift(entry);
       db.audit = db.audit.slice(0, 80);
-      setStore("audit", db.audit);
+      localStorage.setItem("mdt_audit",JSON.stringify(db.audit));
+      if(remoteReady && currentOrgId) firestore.collection("organizations").doc(currentOrgId).collection("audit").add(entry).catch(handleFirebaseError);
     }
 
     function openEmergencyModal() {
@@ -2219,9 +2384,34 @@
       openModal("Nouvelle transmission", "Le dossier source reste dans votre service.", "ÉCHANGE INTERSERVICES", bodyHTML);
       $("modalForm").onsubmit = e => {
         e.preventDefault();
-        const item={id:`TRS-${new Date().getFullYear()}-${String(db.transmissions.length+45).padStart(3,"0")}`,date:new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"})+" · "+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}),from:activeService.code,to:$("trsTarget").value,type:$("trsType").value,subject:$("trsSubject").value.trim(),confidentiality:"Restreint",status:"Envoyé",payload:$("trsPayload").value.trim(),legal:$("trsLegal").value.trim()};
+        const item={id:`TRS-${new Date().getFullYear()}-${String(db.transmissions.length+45).padStart(3,"0")}`,date:new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"})+" · "+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}),from:activeService.code,to:$("trsTarget").value,type:$("trsType").value,subject:$("trsSubject").value.trim(),confidentiality:"Restreint",status:"Envoyé",payload:$("trsPayload").value.trim(),legal:$("trsLegal").value.trim()};item.participants=transmissionParticipants(item);
         db.transmissions.unshift(item); setStore("transmissions",db.transmissions); addAudit("Transmission",item.id,"Scellée",item.legal);
         modal.classList.add("hidden"); notify("Transmission scellée, horodatée et envoyée."); renderDynamicPage();
+      };
+    }
+
+    async function openCreateStaffModal() {
+      if(!["owner","admin","direction"].includes(currentUserProfile?.role)) return notify("Droit de direction requis.");
+      const bodyHTML=`
+        <div class="form-group"><label>Nom RP</label><input id="staffName" class="field" required></div>
+        <div class="form-group"><label>Matricule</label><input id="staffBadge" class="field" required placeholder="GND-0123"></div>
+        <div class="form-group"><label>Institution</label><select id="staffService" class="field">${db.services.filter(s=>s.enabled).map(s=>`<option value="${s.code}">${s.name}</option>`).join("")}</select></div>
+        <div class="form-group"><label>Rôle / habilitation</label><select id="staffRole" class="field"><option value="agent">Agent</option><option value="supervisor">Superviseur</option><option value="opj">OPJ</option><option value="dispatcher">Opérateur dispatch</option><option value="medic">Soignant</option><option value="doctor">Médecin</option><option value="magistrate">Magistrat</option><option value="greffe">Greffe</option><option value="direction">Direction</option><option value="admin">Administrateur</option></select></div>
+        <div class="form-group"><label>Adresse de connexion</label><input id="staffEmail" type="email" class="field" required></div>
+        <div class="form-group"><label>Mot de passe temporaire</label><input id="staffPassword" type="password" minlength="8" class="field" required></div>
+        <button class="primary" type="submit" style="width:100%">Créer et habiliter le compte</button>`;
+      openModal("Créer un compte agent","Le compte sera rattaché uniquement à votre organisation.","ADMINISTRATION DES ACCÈS",bodyHTML);
+      $("modalForm").onsubmit=async e=>{e.preventDefault();
+        try{
+          const secondaryName="staff-"+Date.now(), secondaryApp=firebase.initializeApp(firebaseConfig,secondaryName), secondaryAuth=secondaryApp.auth();
+          const cred=await secondaryAuth.createUserWithEmailAndPassword($("staffEmail").value.trim(),$("staffPassword").value);
+          const profile={uid:cred.user.uid,orgId:currentOrgId,name:$("staffName").value.trim(),badge:$("staffBadge").value.trim().toUpperCase(),service:$("staffService").value,role:$("staffRole").value,active:true,email:$("staffEmail").value.trim().toLowerCase(),createdAt:serverTimestamp(),createdBy:currentFirebaseUser.uid};
+          await firestore.collection("users").doc(cred.user.uid).set(profile);
+          const staff={id:profile.badge,uid:profile.uid,name:profile.name,service:profile.service,grade:roleLabel(profile.role),permissions:profile.role,status:"Actif",orgId:currentOrgId};
+          await firestore.collection("organizations").doc(currentOrgId).collection("staff").doc(profile.uid).set(staff);
+          await secondaryAuth.signOut(); await secondaryApp.delete();
+          addAudit("Création compte",profile.badge,"Autorisé","Administration du personnel"); modal.classList.add("hidden");notify("Compte créé et habilité.");
+        }catch(error){handleFirebaseError(error);}
       };
     }
 
@@ -2682,6 +2872,7 @@
           citizenId: cit.id,
           citizenName: `${cit.lastname} ${cit.firstname}`,
           author: db.config.agentName,
+          service: activeService.code,
           content: $("newRepContent").value.trim()
         };
 
@@ -2726,7 +2917,8 @@
           status: "Actif",
           desc: $("newCaseDesc").value.trim(),
           citizenId: cit.id,
-          citizenName: `${cit.lastname} ${cit.firstname}`
+          citizenName: `${cit.lastname} ${cit.firstname}`,
+          service: activeService.code
         };
 
         db.cases.unshift(newCase);

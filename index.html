@@ -1411,6 +1411,33 @@
       { id: "AG-003", name: "Dr Chloé Robert", service: "CH", grade: "Directrice médicale", permissions: "Direction complète", status: "Actif" }
     ];
 
+    const initialEmergencyCalls = [
+      { id:"APL-112-084", channel:"112", received:"21:42", location:"A6 — sortie 14", nature:"Accident corporel", priority:"P1", lead:"SP", engaged:"SP · CH · GN", status:"Coordination active", shared:"Localisation, risques, victimes estimées" },
+      { id:"APL-17-117", channel:"17", received:"21:28", location:"Senora Freeway", nature:"Véhicule signalé", priority:"P2", lead:"GN", engaged:"GN · PN", status:"Unités engagées", shared:"Signalement opérationnel et direction de fuite" },
+      { id:"APL-15-031", channel:"15", received:"20:51", location:"Place République", nature:"Malaise sur voie publique", priority:"P2", lead:"CH", engaged:"CH · SP", status:"Régulation médicale", shared:"Bilan secouriste utile à la régulation" }
+    ];
+
+    const initialTransmissions = [
+      { id:"TRS-2026-041", date:"10/08 · 21:46", from:"GN", to:"PARQUET", type:"Compte rendu OPJ", subject:"DOS-01 — saisine du parquet", confidentiality:"Judiciaire", status:"Reçu", payload:"Qualification proposée, procès-verbaux et pièces utiles", legal:"Direction de l'enquête par l'autorité judiciaire" },
+      { id:"TRS-2026-042", date:"10/08 · 21:44", from:"SP", to:"CH", type:"Bilan secouriste", subject:"APL-112-084 — 2 victimes", confidentiality:"Santé · minimum nécessaire", status:"Pris en charge", payload:"Constantes, mécanisme lésionnel, gestes effectués et heure d'arrivée", legal:"Continuité des soins" },
+      { id:"TRS-2026-043", date:"10/08 · 20:12", from:"CH", to:"ÉTAT CIVIL", type:"Volet administratif décès", subject:"DEC-2026-004", confidentiality:"Administratif", status:"À traiter", payload:"Identité, date, heure, commune et auteur du certificat — aucune donnée clinique", legal:"Déclaration d'état civil" },
+      { id:"TRS-2026-044", date:"10/08 · 19:35", from:"PRÉFECTURE", to:"GN", type:"Demande d'enquête administrative", subject:"PPA-001 — dossier SIA", confidentiality:"Restreint", status:"En attente", payload:"Identité et contrôle administratif demandé — pas de dossier médical", legal:"Instruction administrative armes" }
+    ];
+
+    const initialTasks = [
+      { id:"TAC-018", service:"GN", due:"22:15", title:"Valider la procédure DOS-01", owner:"OPJ de permanence", priority:"Haute", status:"À faire" },
+      { id:"TAC-019", service:"CH", due:"Immédiat", title:"Réguler l'appel APL-15-031", owner:"Médecin régulateur", priority:"Critique", status:"En cours" },
+      { id:"TAC-020", service:"SP", due:"22:05", title:"Transmettre le bilan du VSAV 12", owner:"Chef d'agrès", priority:"Haute", status:"À faire" },
+      { id:"TAC-021", service:"GVT", due:"11/08", title:"Enregistrer le volet décès DEC-2026-004", owner:"Officier d'état civil", priority:"Normale", status:"À faire" }
+    ];
+
+    const initialAudit = [
+      { time:"21:47:12", actor:"GND-0742", service:"GN", action:"Consultation", object:"DOS-01", result:"Autorisé", reason:"Enquête en cours" },
+      { time:"21:46:03", actor:"GND-0742", service:"GN", action:"Transmission", object:"TRS-2026-041", result:"Scellée", reason:"Saisine parquet" },
+      { time:"21:44:38", actor:"CH-019", service:"CH", action:"Lecture dossier", object:"PAT-FR-02", result:"Autorisé", reason:"Continuité des soins" },
+      { time:"21:43:51", actor:"PN-112", service:"PN", action:"Accès dossier médical", object:"PAT-FR-02", result:"Refusé", reason:"Hors habilitation / secret médical" }
+    ];
+
     const initialConfig = {
       orgName: "RÉPUBLIQUE FRANÇAISE",
       agentName: "Noé Natter",
@@ -1448,6 +1475,10 @@
       justiceCases: getStore("justiceCases", initialJusticeCases),
       prisonTransfers: getStore("prisonTransfers", initialPrisonTransfers),
       staff: getStore("staff", initialStaff),
+      emergencyCalls: getStore("emergencyCalls", initialEmergencyCalls),
+      transmissions: getStore("transmissions", initialTransmissions),
+      tasks: getStore("tasks", initialTasks),
+      audit: getStore("audit", initialAudit),
       config: getStore("config", initialConfig)
     };
 
@@ -1456,11 +1487,11 @@
     // ==========================================
 
     const pagesByService = {
-      GN: [["Tableau de bord","⌂"],["Citoyens","♙"],["Véhicules","▣"],["Patrouilles","◉"],["Interventions","⚡"],["Rapports","▤"],["Dossiers","◇"],["Port d'armes","⌖"],["Personnel","♜"]],
-      PN: [["Tableau de bord","⌂"],["Citoyens","♙"],["Véhicules","▣"],["Patrouilles","◉"],["Interventions","⚡"],["Rapports","▤"],["Dossiers","◇"],["Port d'armes","⌖"],["Personnel","♜"]],
-      SP: [["Tableau de bord","⌂"],["Interventions","⚡"],["Patrouilles","◉"],["Citoyens","♙"],["Rapports","▤"],["Personnel","♜"]],
-      CH: [["Tableau de bord","⌂"],["Patients","✚"],["Port d'armes","⌖"],["Interventions","⚡"],["Patrouilles","◉"],["Décès","†"],["Rapports","▤"],["Personnel","♜"]],
-      GVT: [["Tableau de bord","⌂"],["État civil","▦"],["Citoyens","♙"],["Justice","⚖"],["Prison","▥"],["Documents","▤"],["Personnel","♜"]]
+      GN: [["Tableau de bord","⌂"],["Centre 15·17·18","☎"],["Tâches","✓"],["Transmissions","⇄"],["Citoyens","♙"],["Véhicules","▣"],["Patrouilles","◉"],["Interventions","⚡"],["Rapports","▤"],["Dossiers","◇"],["Armes · SIA","⌖"],["Personnel","♜"],["Audit & accès","◈"]],
+      PN: [["Tableau de bord","⌂"],["Centre 15·17·18","☎"],["Tâches","✓"],["Transmissions","⇄"],["Citoyens","♙"],["Véhicules","▣"],["Patrouilles","◉"],["Interventions","⚡"],["Rapports","▤"],["Dossiers","◇"],["Armes · SIA","⌖"],["Personnel","♜"],["Audit & accès","◈"]],
+      SP: [["Tableau de bord","⌂"],["Centre 15·17·18","☎"],["Tâches","✓"],["Transmissions","⇄"],["Interventions","⚡"],["Patrouilles","◉"],["Rapports","▤"],["Personnel","♜"],["Audit & accès","◈"]],
+      CH: [["Tableau de bord","⌂"],["Centre 15·17·18","☎"],["Tâches","✓"],["Transmissions","⇄"],["Patients","✚"],["Armes · SIA","⌖"],["Interventions","⚡"],["Patrouilles","◉"],["Décès","†"],["Rapports","▤"],["Personnel","♜"],["Audit & accès","◈"]],
+      GVT: [["Tableau de bord","⌂"],["Tâches","✓"],["Transmissions","⇄"],["État civil","▦"],["Citoyens","♙"],["Justice","⚖"],["Prison","▥"],["Armes · SIA","⌖"],["Documents","▤"],["Personnel","♜"],["Audit & accès","◈"]]
     };
 
     function currentPages() {
@@ -1520,14 +1551,18 @@
         "Rapports": "Rédaction et consignation de rapports officiels d'intervention.",
         "Dossiers": "Dossiers d'enquête criminelle et mandats d'arrêt émis.",
         "Patrouilles": "Création, composition et suivi opérationnel des unités engagées.",
+        "Centre 15·17·18": "Coordination des appels 15, 17, 18 et 112 selon le service pilote et le besoin opérationnel.",
+        "Tâches": "Corbeille de travail, validations hiérarchiques et échéances du service.",
+        "Transmissions": "Échanges interservices ciblés, scellés et traçables selon le besoin d'en connaître.",
         "Patients": "Dossiers patients, antécédents et suivi médical confidentiel.",
-        "Port d'armes": "Circuit médico-administratif des demandes de permis de port d'armes.",
+        "Armes · SIA": "Instruction administrative des armes : certificat, préfecture/SIA et enquête administrative cloisonnée.",
         "Décès": "Déclarations médicales de décès et transmission à l'état civil.",
         "État civil": "Recensement national et délivrance des documents officiels.",
         "Justice": "Affaires transmises par les forces de l'ordre et audiences du tribunal.",
         "Prison": "Clôture judiciaire, condamnations et transferts pénitentiaires.",
         "Documents": "Création et suivi des papiers officiels des citoyens.",
-        "Personnel": "Gestion interne du service, grades et habilitations."
+        "Personnel": "Gestion interne du service, grades et habilitations.",
+        "Audit & accès": "Habilitations par rôle, journal des consultations et refus d'accès."
       };
 
       $("pageDescription").textContent = descriptions[pageName] || "";
@@ -1981,6 +2016,31 @@
         );
       }
 
+      else if (activePage === "Centre 15·17·18") {
+        actions.innerHTML = `<button class="primary" onclick="openEmergencyModal()">＋ Prendre un appel</button>`;
+        content.innerHTML = workflowNotice("Une coordination, pas un dossier unique", "Le 15 assure la régulation médicale, le 17 la police-secours, le 18 les secours et le 112 oriente l'appel. Chaque service ne reçoit que la synthèse nécessaire à son engagement.") + premiumRegister(
+          "CHAÎNE D'URGENCE", "Appels et coordination interservices",
+          ["Canal / appel", "Lieu · nature", "Priorité", "Pilote / engagés", "Statut"],
+          db.emergencyCalls.map(c => [`${c.channel} · ${c.id}`, `${c.location}<br><small>${c.nature}</small>`, c.priority, `${c.lead}<br><small>${c.engaged}</small>`, c.status]), "Aucun appel actif."
+        );
+      }
+
+      else if (activePage === "Tâches") {
+        const visible = db.tasks.filter(t => t.service === activeService.code);
+        content.innerHTML = premiumRegister("CORBEILLE MÉTIER", "Actions à valider", ["Référence", "Échéance", "Action", "Responsable", "État"], visible.map(t => [t.id,t.due,t.title,t.owner,t.status]), "Aucune tâche pour ce service.");
+      }
+
+      else if (activePage === "Transmissions") {
+        actions.innerHTML = `<button class="primary" onclick="openTransmissionModal()">＋ Nouvelle transmission</button>`;
+        const aliases = activeService.code === "GVT" ? ["GVT","PARQUET","TRIBUNAL","PRÉFECTURE","ÉTAT CIVIL","PRISON"] : [activeService.code];
+        const visible = db.transmissions.filter(t => aliases.includes(t.from) || aliases.includes(t.to));
+        content.innerHTML = workflowNotice("Principe du besoin d'en connaître", "Une transmission indique sa finalité, son destinataire et son niveau de confidentialité. Le dossier source reste dans le service producteur ; seules les pièces nécessaires sont remises.") + premiumRegister(
+          "MESSAGERIE SÉCURISÉE", "Flux entrants et sortants",
+          ["Référence / date", "De → vers", "Objet", "Niveau", "Statut"],
+          visible.map(t => [`${t.id}<br><small>${t.date}</small>`, `${t.from} → ${t.to}`, `${t.subject}<br><small>${t.type}</small>`, t.confidentiality, t.status]), "Aucune transmission pour ce service."
+        );
+      }
+
       else if (activePage === "Patients") {
         actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('patient')">＋ Créer un dossier patient</button>`;
         content.innerHTML = premiumRegister(
@@ -1991,14 +2051,14 @@
         ) + workflowNotice("Accès réservé au personnel hospitalier habilité", "Les forces de l'ordre ne voient pas le contenu médical. Seuls les certificats explicitement transmis leur sont accessibles.");
       }
 
-      else if (activePage === "Port d'armes") {
+      else if (activePage === "Armes · SIA") {
         const isMedical = activeService.code === "CH";
         actions.innerHTML = `<button class="primary" onclick="createSimpleRecord('weapon')">＋ Nouvelle demande</button>`;
         content.innerHTML = workflowNotice(
           "Circuit interservices sécurisé",
           isMedical
-            ? "Le médecin évalue l'aptitude puis transmet uniquement sa décision aux forces de l'ordre."
-            : "Les forces de l'ordre ne reçoivent le dossier qu'après validation médicale."
+            ? "Le médecin établit un certificat destiné au dossier administratif. Le contenu du dossier patient reste couvert par le secret médical."
+            : "La préfecture instruit le dossier dans le SIA et peut demander une enquête administrative. Les forces de l'ordre ne consultent jamais le dossier médical."
         ) + premiumRegister(
           "AUTORISATIONS RÉGLEMENTÉES", "Demandes de permis de port d'armes",
           ["Référence", "Demandeur", "Avis médical", "Contrôle FDO", "Étape"],
@@ -2063,6 +2123,21 @@
           "Aucun membre enregistré dans ce service."
         );
       }
+
+
+      else if (activePage === "Audit & accès") {
+        const rights = {
+          GN:"Identité · véhicules · procédures · police judiciaire · appels 17/112",
+          PN:"Identité · véhicules · procédures · police judiciaire · appels 17/112",
+          SP:"Secours · bilans secouristes · moyens engagés · appels 18/112",
+          CH:"Dossiers patients · régulation 15 · soins · certificats médicaux",
+          GVT:"État civil · préfecture · parquet/tribunal · pénitentiaire selon le rôle"
+        };
+        content.innerHTML = workflowNotice(`Périmètre actif : ${activeService.name}`, rights[activeService.code]) + premiumRegister(
+          "JOURNAL INALTÉRABLE", "Dernières traces de sécurité", ["Heure", "Agent / service", "Action", "Objet", "Résultat"],
+          db.audit.map(a => [a.time, `${a.actor} · ${a.service}`, `${a.action}<br><small>${a.reason}</small>`, a.object, a.result]), "Aucune trace."
+        );
+      }
     }
 
     function premiumRegister(eyebrow, title, headers, rows, emptyMessage) {
@@ -2102,6 +2177,52 @@
         justice: "procédure judiciaire", prison: "dossier d'écrou", staff: "membre du personnel"
       };
       notify(`Module de création « ${labels[type] || type} » prêt pour la connexion Firebase.`);
+    }
+
+    function addAudit(action, object, result, reason) {
+      db.audit.unshift({
+        time:new Date().toLocaleTimeString("fr-FR"), actor:db.config.agentBadge,
+        service:activeService.code, action, object, result, reason
+      });
+      db.audit = db.audit.slice(0, 80);
+      setStore("audit", db.audit);
+    }
+
+    function openEmergencyModal() {
+      const bodyHTML = `
+        <div class="form-group"><label>Numéro d'entrée</label><select id="callChannel" class="field"><option>15</option><option>17</option><option>18</option><option>112</option></select></div>
+        <div class="form-group"><label>Localisation vérifiée</label><input id="callLocation" class="field" required placeholder="Commune, voie, point kilométrique"></div>
+        <div class="form-group"><label>Nature synthétique</label><input id="callNature" class="field" required placeholder="Accident, agression, incendie, urgence médicale..."></div>
+        <div class="form-group"><label>Services à engager</label><input id="callServices" class="field" required value="${activeService.code}" placeholder="GN · SP · CH"></div>
+        <div class="form-group"><label>Synthèse partageable — minimum nécessaire</label><textarea id="callShared" class="field" required placeholder="Localisation, danger, nombre de victimes et éléments utiles à l'engagement"></textarea></div>
+        <button class="primary" type="submit" style="width:100%">Créer et tracer l'appel</button>`;
+      openModal("Prendre un appel d'urgence", "Qualifier, orienter et engager les moyens adaptés.", "CENTRE 15 · 17 · 18 · 112", bodyHTML);
+      $("modalForm").onsubmit = e => {
+        e.preventDefault();
+        const channel=$("callChannel").value;
+        const item={id:`APL-${channel}-${String(db.emergencyCalls.length+85).padStart(3,"0")}`,channel,received:new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}),location:$("callLocation").value.trim(),nature:$("callNature").value.trim(),priority:"P2",lead:activeService.code,engaged:$("callServices").value.trim(),status:"Coordination active",shared:$("callShared").value.trim()};
+        db.emergencyCalls.unshift(item); setStore("emergencyCalls",db.emergencyCalls); addAudit("Création appel",item.id,"Autorisé","Mission opérationnelle");
+        modal.classList.add("hidden"); notify("Appel qualifié et moyens alertés."); renderDynamicPage();
+      };
+    }
+
+    function openTransmissionModal() {
+      const targets = activeService.code === "GN" || activeService.code === "PN" ? ["PARQUET","SP","CH","PRÉFECTURE"] : activeService.code === "CH" ? ["SP","ÉTAT CIVIL","PARQUET"] : activeService.code === "SP" ? ["CH","GN","PN"] : ["GN","PN","CH","SP","TRIBUNAL","PRISON"];
+      const bodyHTML = `
+        <div class="form-group"><label>Destinataire habilité</label><select id="trsTarget" class="field">${targets.map(t=>`<option>${t}</option>`).join("")}</select></div>
+        <div class="form-group"><label>Type de transmission</label><select id="trsType" class="field"><option>Compte rendu opérationnel</option><option>Saisine judiciaire</option><option>Bilan secouriste</option><option>Volet administratif</option><option>Demande administrative</option></select></div>
+        <div class="form-group"><label>Objet</label><input id="trsSubject" class="field" required placeholder="Référence et objet précis"></div>
+        <div class="form-group"><label>Finalité / fondement métier</label><input id="trsLegal" class="field" required placeholder="Coordination, continuité des soins, procédure judiciaire..."></div>
+        <div class="form-group"><label>Informations strictement nécessaires</label><textarea id="trsPayload" class="field" required placeholder="Ne pas recopier le dossier complet"></textarea></div>
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:10px;color:var(--text-muted);margin:12px 0"><input id="trsConfirm" type="checkbox" required> Je confirme que le destinataire est habilité et que le contenu respecte le besoin d'en connaître.</label>
+        <button class="primary" type="submit" style="width:100%">Sceller et transmettre</button>`;
+      openModal("Nouvelle transmission", "Le dossier source reste dans votre service.", "ÉCHANGE INTERSERVICES", bodyHTML);
+      $("modalForm").onsubmit = e => {
+        e.preventDefault();
+        const item={id:`TRS-${new Date().getFullYear()}-${String(db.transmissions.length+45).padStart(3,"0")}`,date:new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"})+" · "+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}),from:activeService.code,to:$("trsTarget").value,type:$("trsType").value,subject:$("trsSubject").value.trim(),confidentiality:"Restreint",status:"Envoyé",payload:$("trsPayload").value.trim(),legal:$("trsLegal").value.trim()};
+        db.transmissions.unshift(item); setStore("transmissions",db.transmissions); addAudit("Transmission",item.id,"Scellée",item.legal);
+        modal.classList.add("hidden"); notify("Transmission scellée, horodatée et envoyée."); renderDynamicPage();
+      };
     }
 
     // Gestionnaires de filtres

@@ -1151,7 +1151,7 @@
     @media(max-width:950px){
       .stats{grid-template-columns:1fr 1fr}
       .grid{grid-template-columns:1fr}
-      .login{grid-template-columns:1fr}
+      .login-container{grid-template-columns:1fr}
       .login-art{display:none}
     }
 
@@ -1685,7 +1685,7 @@
       $("orgSmall").textContent=organization.name.toUpperCase();
       $("agentNameDisplay").textContent=profile.name;
       $("agentRoleDisplay").textContent=`${roleLabel(profile.role)} • ${profile.badge}`;
-      $("agentAvatar").textContent=profile.name.split(" ").map(n=>n[0]).join("").toUpperCase().slice(0,2);
+      $("agentAvatar").textContent=profile.name.trim().split(/\s+/).filter(Boolean).map(n=>n[0]).join("").toUpperCase().slice(0,2);
       buildServices(); selectService(profile.service || "GN");
     }
 
@@ -2983,7 +2983,7 @@
         // Actualisation directe
         $("orgSmall").textContent = db.config.orgName;
         $("agentNameDisplay").textContent = db.config.agentName;
-        $("agentAvatar").textContent = db.config.agentName.split(" ").map(n => n[0]).join("").toUpperCase();
+        $("agentAvatar").textContent = db.config.agentName.trim().split(/\s+/).filter(Boolean).map(n => n[0]).join("").toUpperCase().slice(0,2);
 
         buildServices();
         selectService(activeService.code);

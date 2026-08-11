@@ -8,11 +8,6 @@ service cloud.firestore {
     function roleIs(roles) { return active() && profile().role in roles; }
     function serviceIs(services) { return active() && profile().service in services; }
     function admin() { return roleIs(['owner', 'admin']); }
-    function manager() { return roleIs(['owner', 'admin', 'direction']); }
-    function government() { return serviceIs(['GVT']); }
-    function lawEnforcement() { return serviceIs(['GN', 'PN']); }
-    function medical() { return serviceIs(['CH']); }
-    function rescue() { return serviceIs(['SP', 'CH']); }
 
     match /organizations/{orgId} {
       allow create: if signedIn()
@@ -23,79 +18,73 @@ service cloud.firestore {
       allow delete: if sameOrg(orgId) && roleIs(['owner']);
 
       match /citizens/{id} {
-        allow read: if sameOrg(orgId) && (admin() || lawEnforcement() || government());
-        allow write: if sameOrg(orgId) && (admin() || manager() || lawEnforcement() || government());
+        allow read: if sameOrg(orgId);
+        allow write: if sameOrg(orgId) && (admin() || roleIs(['direction', 'supervisor', 'opj', 'agent', 'doctor', 'medic', 'dispatcher']));
       }
       match /vehicles/{id} {
-        allow read: if sameOrg(orgId) && (admin() || lawEnforcement() || government());
-        allow write: if sameOrg(orgId) && (admin() || manager() || lawEnforcement());
+        allow read: if sameOrg(orgId) && (admin() || serviceIs(['GN', 'PN', 'GVT']));
+        allow write: if sameOrg(orgId) && (admin() || (serviceIs(['GN', 'PN', 'GVT']) && roleIs(['direction', 'supervisor', 'opj', 'agent', 'doctor', 'medic', 'dispatcher'])));
       }
       match /medicalRecords/{id} {
-        allow read: if sameOrg(orgId) && (admin() || medical());
-        allow write: if sameOrg(orgId) && (admin() || (medical() && roleIs(['direction','doctor','medic'])));
+        allow read: if sameOrg(orgId) && (admin() || serviceIs(['CH']));
+        allow write: if sameOrg(orgId) && (admin() || (serviceIs(['CH']) && roleIs(['direction', 'doctor', 'medic'])));
       }
       match /deaths/{id} {
-        allow read: if sameOrg(orgId) && (admin() || medical() || government());
-        allow create, update: if sameOrg(orgId) && (admin() || medical());
-        allow delete: if sameOrg(orgId) && admin();
+        allow read: if sameOrg(orgId) && (admin() || serviceIs(['CH', 'GVT']));
+        allow write: if sameOrg(orgId) && (admin() || (serviceIs(['CH', 'GVT']) && roleIs(['direction', 'supervisor', 'opj', 'agent', 'doctor', 'medic', 'dispatcher'])));
       }
       match /justiceCases/{id} {
-        allow read: if sameOrg(orgId) && (admin() || government());
-        allow write: if sameOrg(orgId) && (admin() || (government() && roleIs(['direction','magistrate','greffe'])));
+        allow read: if sameOrg(orgId) && (admin() || serviceIs(['GVT']));
+        allow write: if sameOrg(orgId) && (admin() || (serviceIs(['GVT']) && roleIs(['direction', 'magistrate', 'greffe'])));
       }
       match /prisonTransfers/{id} {
-        allow read: if sameOrg(orgId) && (admin() || government());
-        allow write: if sameOrg(orgId) && (admin() || (government() && roleIs(['direction','magistrate','greffe'])));
+        allow read: if sameOrg(orgId) && (admin() || serviceIs(['GVT']));
+        allow write: if sameOrg(orgId) && (admin() || (serviceIs(['GVT']) && roleIs(['direction', 'magistrate', 'greffe'])));
       }
       match /civilDocuments/{id} {
-        allow read: if sameOrg(orgId) && (admin() || government());
-        allow write: if sameOrg(orgId) && (admin() || government());
+        allow read: if sameOrg(orgId) && (admin() || serviceIs(['GVT']));
+        allow write: if sameOrg(orgId) && (admin() || serviceIs(['GVT']));
       }
       match /weaponPermits/{id} {
-        allow read: if sameOrg(orgId) && (admin() || medical() || government() || lawEnforcement());
-        allow write: if sameOrg(orgId) && (admin() || manager() || medical() || government() || lawEnforcement());
+        allow read: if sameOrg(orgId) && (admin() || serviceIs(['CH', 'GN', 'PN', 'GVT']));
+        allow write: if sameOrg(orgId) && (admin() || (serviceIs(['CH', 'GN', 'PN', 'GVT']) && roleIs(['direction', 'supervisor', 'opj', 'agent', 'doctor', 'medic', 'dispatcher'])));
       }
       match /cases/{id} {
-        allow read: if sameOrg(orgId) && (admin() || (lawEnforcement() && resource.data.service == profile().service) || government());
-        allow write: if sameOrg(orgId) && (admin() || (lawEnforcement() && (resource.data.service == profile().service || request.resource.data.service == profile().service)));
+        allow read: if sameOrg(orgId) && (admin() || (serviceIs(['GN', 'PN', 'GVT']) && resource.data.service == profile().service));
+        allow write: if sameOrg(orgId) && (admin() || (serviceIs(['GN', 'PN', 'GVT']) && roleIs(['direction', 'supervisor', 'opj', 'agent', 'doctor', 'medic', 'dispatcher']) && (resource == null || resource.data.service == profile().service) && request.resource.data.service == profile().service));
       }
       match /transmissions/{id} {
         allow read: if sameOrg(orgId) && (admin() || profile().service in resource.data.participants);
-        allow create: if sameOrg(orgId)
-          && request.resource.data.from == profile().service
-          && profile().service in request.resource.data.participants;
-        allow update: if sameOrg(orgId) && (admin() || profile().service in resource.data.participants);
-        allow delete: if sameOrg(orgId) && admin();
+        allow write: if sameOrg(orgId) && (admin() || (roleIs(['direction', 'supervisor', 'opj', 'agent', 'doctor', 'medic', 'dispatcher']) && (resource == null || profile().service in resource.data.participants) && (profile().service in request.resource.data.participants)));
       }
       match /staff/{id} {
         allow read: if sameOrg(orgId) && (admin() || resource.data.service == profile().service);
-        allow write: if sameOrg(orgId) && manager();
+        allow write: if sameOrg(orgId) && (admin() || roleIs(['direction']));
       }
       match /audit/{id} {
-        allow read: if sameOrg(orgId) && manager();
+        allow read: if sameOrg(orgId) && (admin() || roleIs(['direction']));
         allow create: if sameOrg(orgId) && request.resource.data.service == profile().service;
         allow update, delete: if false;
       }
       match /emergencyCalls/{id} {
         allow read: if sameOrg(orgId);
-        allow create, update: if sameOrg(orgId) && (admin() || rescue() || lawEnforcement() || roleIs(['dispatcher','direction']));
-        allow delete: if sameOrg(orgId) && admin();
+        allow write: if sameOrg(orgId) && (admin() || roleIs(['direction', 'supervisor', 'opj', 'agent', 'doctor', 'medic', 'dispatcher']));
       }
       match /interventions/{id} {
         allow read: if sameOrg(orgId);
-        allow write: if sameOrg(orgId) && (admin() || manager() || rescue() || lawEnforcement());
+        allow write: if sameOrg(orgId) && (admin() || roleIs(['direction', 'supervisor', 'opj', 'agent', 'doctor', 'medic', 'dispatcher']));
       }
       match /patrols/{id} {
         allow read: if sameOrg(orgId);
-        allow write: if sameOrg(orgId) && (admin() || manager() || resource.data.service == profile().service || request.resource.data.service == profile().service);
+        allow write: if sameOrg(orgId) && (admin() || roleIs(['direction', 'supervisor', 'opj', 'agent', 'doctor', 'medic', 'dispatcher']));
       }
       match /tasks/{id} {
-        allow read: if sameOrg(orgId) && (admin() || resource.data.service == profile().service);
-        allow write: if sameOrg(orgId) && (admin() || manager() || request.resource.data.service == profile().service);
+        allow read: if sameOrg(orgId);
+        allow write: if sameOrg(orgId) && (admin() || roleIs(['direction', 'supervisor', 'opj', 'agent', 'doctor', 'medic', 'dispatcher']));
       }
       match /reports/{id} {
         allow read: if sameOrg(orgId) && (admin() || resource.data.service == profile().service);
-        allow write: if sameOrg(orgId) && (admin() || manager() || request.resource.data.service == profile().service || resource.data.service == profile().service);
+        allow write: if sameOrg(orgId) && (admin() || (roleIs(['direction', 'supervisor', 'opj', 'agent', 'doctor', 'medic', 'dispatcher']) && (resource == null || resource.data.service == profile().service) && request.resource.data.service == profile().service));
       }
     }
 
